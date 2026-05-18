@@ -94,26 +94,26 @@ export const useRestaurantStore = create<RestaurantState>()(
         }
 
         try {
-          const { data, error } = await supabase
-            .from('dashboard_users')
-            .select('*')
-            .eq('email', email)
-            .eq('password', password)
-            .single()
+          const { data, error } = await supabase.rpc('verify_dashboard_user', {
+            input_email: email,
+            input_password: password
+          })
 
-          if (error || !data) {
-            console.error("Login verification failed:", error?.message)
+          if (error || !data || data.length === 0) {
+            console.error("Login verification failed:", error?.message || "Invalid credentials")
             return false
           }
+
+          const user = data[0]
 
           set({
             isAuthenticated: true,
             isOnboarded: true,
             profile: {
-              id: data.id,
-              email: data.email,
-              name: data.name,
-              role: data.role || 'staff'
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role || 'staff'
             }
           })
 

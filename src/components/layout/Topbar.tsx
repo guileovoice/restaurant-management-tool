@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu'
 import { format } from 'date-fns'
+import { useRouter } from 'next/navigation'
 
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
 
@@ -20,7 +21,12 @@ export function Topbar() {
   const [time, setTime] = useState(new Date())
   const [mounted, setMounted] = useState(false)
   const [notificationCount, setNotificationCount] = useState(3)
-  const { info, logout } = useRestaurantStore()
+  const { info, profile, logout } = useRestaurantStore()
+  const router = useRouter()
+
+  const initials = profile?.name 
+    ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) 
+    : 'AM'
 
   useEffect(() => {
     setMounted(true)
@@ -142,21 +148,21 @@ export function Topbar() {
         <DropdownMenu>
           <DropdownMenuTrigger suppressHydrationWarning className="outline-none">
             <div className="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold cursor-pointer hover:bg-primary/30 transition-all">
-              AM
+              {initials}
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 bg-surface border-border">
             <DropdownMenuLabel className="text-text-primary">My Account</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-border" />
-            <DropdownMenuItem className="text-text-primary focus:bg-surface2 cursor-pointer">Profile</DropdownMenuItem>
-            <DropdownMenuItem className="text-text-primary focus:bg-surface2 cursor-pointer">Billing</DropdownMenuItem>
-            <DropdownMenuItem className="text-text-primary focus:bg-surface2 cursor-pointer">Team</DropdownMenuItem>
+            <DropdownMenuItem className="text-text-primary focus:bg-surface2 cursor-pointer" onClick={() => router.push('/settings?tab=business')}>Profile</DropdownMenuItem>
+            <DropdownMenuItem className="text-text-primary focus:bg-surface2 cursor-pointer" onClick={() => router.push('/settings?tab=billing')}>Billing</DropdownMenuItem>
+            <DropdownMenuItem className="text-text-primary focus:bg-surface2 cursor-pointer" onClick={() => router.push('/settings?tab=team')}>Team</DropdownMenuItem>
             <DropdownMenuSeparator className="bg-border" />
             <DropdownMenuItem 
               className="text-danger focus:bg-danger/10 cursor-pointer"
-              onClick={() => {
-                logout()
-                window.location.href = '/login'
+              onClick={async () => {
+                await logout()
+                router.push('/login')
               }}
             >
               Sign out

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { 
   LayoutDashboard, 
   BarChart3,
@@ -34,7 +34,19 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { info } = useRestaurantStore()
+  const router = useRouter()
+  const { info, profile, logout } = useRestaurantStore()
+
+  const initials = profile?.name 
+    ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) 
+    : 'AM'
+  const displayName = profile?.name || 'Alex Mendes'
+  const displayEmail = profile?.email || 'alex@nypdq.com'
+
+  const handleLogout = async () => {
+    await logout()
+    router.push('/login')
+  }
 
   return (
     <aside className="w-[240px] bg-[#13131A] border-r border-border fixed left-0 top-0 h-full flex flex-col z-50">
@@ -101,13 +113,17 @@ export function Sidebar() {
 
         <div className="flex items-center gap-3 px-2">
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">
-            AM
+            {initials}
           </div>
           <div className="flex-1 overflow-hidden">
-            <p className="text-sm font-medium text-text-primary truncate">Alex Mendes</p>
-            <p className="text-[10px] text-text-muted truncate">alex@nypdq.com</p>
+            <p className="text-sm font-medium text-text-primary truncate">{displayName}</p>
+            <p className="text-[10px] text-text-muted truncate">{displayEmail}</p>
           </div>
-          <button suppressHydrationWarning className="text-text-muted hover:text-danger transition-colors">
+          <button 
+            suppressHydrationWarning 
+            className="text-text-muted hover:text-danger transition-colors"
+            onClick={handleLogout}
+          >
             <LogOut className="w-4 h-4" />
           </button>
         </div>
