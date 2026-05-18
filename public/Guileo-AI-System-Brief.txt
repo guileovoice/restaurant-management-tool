@@ -1,0 +1,638 @@
+--- Page 1 ---
+S Y S T E M  B R I E F  ·  Q 2  2 0 2 6
+Guileo AIVoice-first Customer Intelligence Platform for
+restaurants, clinics, and service businesses.
+Every phone call, WhatsApp message, and SMS becomes a
+structured customer profile with explicit consent — feeding
+marketing automation, ad audiences, and predictive ML that
+increase repeat business and reduce churn. 
+Operating company
+Tribeca Global Inc.
+Product
+Guileo AI
+First market
+United States
+First tenant
+NYPDQ · Astoria, NY
+Guileo AI · System Brief · Page 1 of 18
+--- Page 2 ---
+1. Executive Summary
+Guileo AI is a multi-tenant SaaS platform that replaces the front desk with an AI voice agent
+— and turns every interaction into customer intelligence the business can use.
+Independent restaurants, dental and aesthetic clinics, and service businesses all share the same
+operational pain: the phone never stops ringing, but they miss 30–40% of calls anyway. They
+lose orders, appointments, and customers to competitors who happen to answer first. They also have
+no idea who their callers are — there's no profile, no history, no follow-up, no marketing reach.
+Guileo AI solves both halves of that problem at once. We provide a 24/7 multilingual AI agent that
+answers calls, takes orders or schedules appointments, processes payments, and confirms by SMS and
+WhatsApp — and behind it, a Customer Data Platform that turns every interaction into a unified
+customer profile with auditable consent. From that data layer we power campaigns, ad audiences, and
+predictive ML that drive repeat purchases and reduce churn.
+3VERTICALS
+4CHANNELS
+3CONSENT TIERS
+24/7ALWAYS ON
+The wedge: Voice answering is the immediate, urgent pain. Customer intelligence is the long-
+term moat. We sell the wedge and own the moat. T enants pay a fixed monthly subscription; we
+never take a percentage of their revenue. 
+1.1 Three vertical products, one platform
+Restaurants
+Phone & WhatsApp ordering,
+kitchen dispatch, payment,
+customer marketing.
+Replaces missed-call leakage
+and DoorDash dependency.
+Clinics
+Appointment booking, no-
+show prevention, insurance
+Q&A, patient CRM. HIPAA-
+compliant; integrates with
+PMS.
+Services
+Salons, law firms,
+contractors, spas. Calendar
+booking, lead intake, follow-
+ups. Lightweight tier, fastest
+onboarding.
+1.2 Why now
+Voice AI is finally good. GPT-4o-class models with sub-500ms latency and natural multilingual
+voices (11Labs Turbo) crossed the threshold of indistinguishability in 2024–2025.
+Phone volume is rising, staffing is collapsing. Restaurants and clinics receive 800–1,000 calls
+per month and miss 30–35% of them. Front desk staff cost $17–$45/hour with high turnover.
+• 
+• 
+Guileo AI · System Brief · Page 2 of 18
+--- Page 3 ---
+Every player today does part of the job. Slang.ai answers FAQs but won't take orders. Hostie
+takes orders but has no marketing layer. Arini does dental but no other vertical. No one has
+stitched voice + payments + CDP + marketing + ML into one product.
+Privacy regulation is now table-stakes. LGPD, CCPA, GDPR, HIPAA — owning consent
+infrastructure correctly is itself a moat.
+• 
+• 
+Guileo AI · System Brief · Page 3 of 18
+--- Page 4 ---
+2. System Architecture
+End-to-end view of the Guileo AI platform — from inbound channels to downstream
+intelligence products.
+Multi-tenant from day 1 · Vertical-aware schemas · Consent-gated data flows · Realtime updates throughout
+Guileo AI
+Voice-first Customer Intelligence Platform · Multi-vertical SaaS · Restaurants · Clinics · Services
+C H A N N E L S — I N P U T
+Voice (Vapi)
+Phone calls · custom AI agent name
+GPT-4o-mini · 11Labs voice (3 options)
+WhatsApp
+Twilio Business API · AI agent
+Inbound + outbound · pre-approved templates
+SMS
+Twilio Conversations
+Order confirmations · receipts · opt-out
+Web
+Order page
+QR / link
+Unified Ingestion · n8n + Identity Resolution
+Channel adapter · phone/email dedup · cross-channel customer linking · vertical routing
+Consent & Compliance Layer
+3 tiers: essential (auto) · marketing (opt-in) · intelligence (explicit consent + value exchange)
+LGPD · CCPA · GDPR · HIPAA (clinics) · audit log · self-service portal
+Customer Data Platform — Multi-tenant Core
+Supabase · tenants · customers · orders · events · consents · campaigns · predictions
+Customer 360 per tenant · cross-tenant identity graph (consent-gated)
+Row-level security · audit log · GDPR/LGPD export & erasure · realtime subscriptions
+Vertical-aware schemas: restaurants · clinics (HIPAA) · services
+Payments
+Stripe Connect
+(orders → tenant)
+Stripe Billing
+(SaaS sub)
+Delivery
+Own driver
+(default)
+DoorDash Drive
+(overflow API)
+D O W N S T R E A M P R O D U C T S
+Campaigns
+Email · SMS · WhatsApp · Voice outbound
+Winback · birthday · abandoned cart
+Segment-based · automated triggers
+Performance Ads
+Meta · Google · TikTok
+Custom audiences · lookalikes
+Hashed PII · intelligence-tier consent only
+Predictive ML
+Churn · LTV · next-order · no-show
+RFM segmentation · recommendations
+scikit-learn · BG/NBD · Gamma-Gamma
+Privacy Portal
+Self-service consent · download data
+Erasure requests · DSR automation
+JWT magic-links · 24h expiry
+B 2 B D A S H B O A R D S — V E R T I C A L U X
+Guileo AI for Restaurants
+Live order board · kitchen email/print/tablet
+Customer 360 · campaigns · ad audiences
+Menu mgmt (manual · AI-PDF · POS sync)
+DoorDash Drive overflow · multi-location
+Guileo AI for Clinics
+Appointment scheduling · no-show prevention
+Patient CRM · insurance Q&A · reminders
+PMS integration (Dentrix · Eaglesoft · OpenDental)
+HIPAA-compliant · BAA signed · encrypted
+Guileo AI for Services
+Salons · law · contractors · spas · trades
+Booking calendar · CRM · reminders
+Google Calendar · Calendly · HubSpot sync
+Lightweight tier · fastest onboarding
+Self-service onboarding · SaaS subscription via Stripe Billing · Setup fee + monthly · 30-day money-back
+Built for the United States first (NYPDQ Astoria as tenant #1) · Brazil expansion via MUUH Pay path
+Powered by Guileo AI · A Tribeca Global Inc. company
+Guileo AI · System Brief · Page 4 of 18
+--- Page 5 ---
+3. System Components
+Eight interlocking systems that together form the Guileo AI platform.
+3.1 Channels (Input Layer)
+COMPONENT PROVIDER PURPOSE
+Voice agent Vapi · Deepgram Nova-2 ·
+GPT-4o-mini · 11Labs T urbo v2.5
+Inbound phone, takes orders/appointments,
+processes payment by voice or sends payment
+link
+WhatsApp
+agent
+T wilio Business API + GPT-4o-
+mini
+Inbound chat ordering, two-way conversations,
+payment links, opt-out keyword handling
+SMS T wilio Conversations Confirmations, receipts, payment links,
+marketing (with consent), STOP/PARAR
+keywords
+Web order
+page
+Next.js (per tenant subdomain)QR-code/link-driven, mobile-first, single-page
+checkout
+3.2 Core Platform
+Orchestration · n8n
+Channel adapter normalizing voice/WA/SMS
+payloads. Identity resolution (cross-channel
+customer linking). Vertical routing (restaurant
+vs clinic vs service workflow). T ool-call handling
+for the AI agent.
+Consent Layer
+3 tiers: essential (auto, contract performance), 
+marketing (soft opt-in), intelligence (explicit
+consent + value exchange). Every grant/
+withdrawal stores prompt text, response,
+channel, IP, and recording/MessageSid as
+evidence.
+Customer Data Platform
+Supabase Postgres. 13+ tables: tenants,
+locations, menu_items, customers, consents,
+orders, events, conversations, messages,
+campaigns, predictions, audiences,
+dsr_requests. Row-level security per tenant.
+Realtime for live order boards.
+Payments · Stripe
+Stripe Connect Express for end-customer
+payments (money goes directly to tenant's
+account — Guileo never touches it). Stripe
+Billing for the SaaS subscription itself with
+proration, dunning, and self-service cancel.
+Guileo AI · System Brief · Page 5 of 18
+--- Page 6 ---
+3.3 Downstream Intelligence Products
+PRODUCT WHAT IT DOES TECH
+Campaigns Automated and ad-hoc email/SMS/WhatsApp
+campaigns with segment targeting, A/B variants,
+attribution back to revenue
+n8n triggers + T wilio +
+SendGrid
+Performance
+Ads
+Auto-sync hashed PII to Meta Custom Audiences,
+Google Customer Match, TikT ok Events. Lookalike
+expansion. Gated by intelligence-tier consent.
+Node + T ypeScript
+workers
+Predictive MLRFM segmentation, churn probability, customer LTV,
+next-order timing, recommendation engine. Daily
+batch jobs.
+Python · scikit-learn ·
+lifetimes (BG/NBD +
+Gamma-Gamma)
+Privacy PortalCustomer self-service: toggle consents, download all
+data as JSON, request deletion. Magic-link JWT, 24h
+expiry.
+Next.js standalone app
+3.4 Customer-facing UX (B2B Dashboards)
+Each vertical has a tailored dashboard built on the same backend. Same data model, different
+workflows and language.
+Restaurants: Live order kanban (paid → preparing → ready → out for delivery), kitchen ticket
+emails, optional thermal printer / tablet display, menu manager, customer 360, campaigns, ad
+audiences.
+Clinics: Appointment calendar, no-show prevention reminders, patient CRM with insurance fields,
+HIPAA-compliant audit trails, BAA portal, PMS integration status.
+Services: Booking calendar with provider/staff routing, customer notes, follow-up sequences,
+Google Calendar / Calendly / HubSpot sync.
+• 
+• 
+• 
+Guileo AI · System Brief · Page 6 of 18
+--- Page 7 ---
+4. Three Verticals, One Platform
+Same backend, same consent layer, same intelligence products. Vertical-specific UX,
+vocabulary, voice prompts, and integrations.
+Strategic principle: A restaurant, a clinic, and a barbershop have nearly identical operational
+needs — answer the phone, capture the customer, complete the transaction, follow up. The
+differences are vocabulary and integrations, not architecture. Building once and adapting per
+vertical is dramatically cheaper than building three separate companies. 
+4.1 Guileo AI for Restaurants
+The user: Independent restaurants and small chains, especially those losing margin to DoorDash/
+UberEats and missing peak-hour calls.
+Anchor tenant: New York Pão de Queijo, Astoria NY — bilingual EN/PT, 50+ menu items, breakfast
+through dinner, delivery + pickup.
+Specific features
+Bilingual voice agent (English ↔ Portuguese auto-detect)
+Menu management with three tiers: manual, AI-extracted from PDF/image, or POS-synced (T oast/
+Square/Clover)
+Kitchen ticket dispatch via email, thermal printer (HTTP), or tablet display
+Delivery zone validation, NYC sales tax (8.875%), delivery fee logic
+DoorDash Drive / UberDirect API integration for overflow delivery
+Zero integration with consumer marketplaces (DoorDash/UberEats listings) — Guileo is the direct
+channel
+4.2 Guileo AI for Clinics
+The user: Dental, dermatology, aesthetic, and small medical practices losing patients to no-shows
+and missed after-hours calls.
+Specific features
+HIPAA-compliant baseline: BAA signed, AES-256 encryption at rest and in transit, restricted PHI
+access, audit logging
+Appointment scheduling with conflict detection, calendar integration
+No-show prevention: smart reminders 24h + 2h before, reschedule prompts, deposit collection
+Insurance Q&A (eligibility, coverage details) — answered conversationally by the agent
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+Guileo AI · System Brief · Page 7 of 18
+--- Page 8 ---
+PMS integration: Dentrix, Eaglesoft, OpenDental, Curve Dental, Pearl
+Patient CRM with treatment history, allergies, medications fields (PHI-flagged)
+4.3 Guileo AI for Services
+The user: Hair salons, barbershops, law firms, accountants, contractors, spas, pet groomers, tutors.
+Anyone who books appointments and answers a phone.
+Specific features
+Lightweight tier — least configuration, fastest onboarding (under 1 hour)
+Calendar-first UX: Google Calendar, Calendly, Outlook, native scheduler
+Multi-staff routing (which barber/lawyer/contractor takes the call)
+Service catalog instead of menu
+Lead intake forms, qualification questions, escalation to human
+HubSpot, Pipedrive, Salesforce sync for sales-led service businesses
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+Guileo AI · System Brief · Page 8 of 18
+--- Page 9 ---
+5. Consent & Compliance
+The privacy infrastructure is designed for maximum capture without violating regulation —
+and is itself a competitive moat.
+5.1 The three-tier consent model
+TIER LEGAL
+BASIS WHAT IT COVERS WHEN ASKED
+ESSENTIAL Contract
+performance
+Order processing, delivery
+confirmations, payment receipts,
+appointment reminders
+Implied — auto-
+granted on first order/
+booking
+MARKETING Consent Promotional messages, special
+offers, weekly specials, loyalty
+rewards from this tenant only
+Soft ask 1 hour after
+first order: "want a $5
+coupon for next time?"
+INTELLIGENCE Explicit
+consent
+Personalized recommendations, ML
+training on de-identified data, ad
+audience inclusion (anonymized via
+SHA-256), cross-tenant lookalikes
+After 2nd order with
+concrete value
+exchange (VIP
+program, priority
+delivery, birthday
+surprise)
+5.2 Capture evidence
+Every consent record stores enough proof to defend a regulator audit:
+Voice channel: recording URL + transcript segment + timestamp
+WhatsApp/SMS channel: T wilio MessageSid (inbound) + reply MessageSid (outbound) + IP
+Web channel: form submission + IP + user agent + signed JWT trail
+Self-service portal: session ID + IP + change diff (granted/withdrawn)
+5.3 Regulatory compliance matrix
+REGULATIONREGION APPLIES TO HOW WE COMPLY
+CCPA / CPRACalifornia,
+USA
+All tenants serving
+CA residents
+Self-service do-not-sell, data export, deletion
+requests, automated DSR
+• 
+• 
+• 
+• 
+Guileo AI · System Brief · Page 9 of 18
+--- Page 10 ---
+REGULATIONREGION APPLIES TO HOW WE COMPLY
+GDPR European
+Union
+Future EU
+expansion
+3-tier consent, full DSAR, right to erasure,
+data portability (JSON export)
+LGPD Brazil Future BR
+expansion via
+MUUH Pay
+Modeled on GDPR; same controls satisfy both.
+PT-BR portal copy.
+HIPAA USA Clinic vertical BAA signed at onboarding, AES-256
+encryption, PHI access logs, encrypted
+backups, restricted role permissions
+PCI DSS Global All tenants Stripe Connect — Guileo never sees card
+data; PCI scope minimized to SAQ-A
+5.4 Data Processing Agreement (tenant ↔ Guileo)
+Each tenant signs a DPA at onboarding authorizing Tribeca Global Inc. (operating as Guileo AI) to
+process their customer data for: (1) service delivery, (2) anonymized aggregate insights, (3) ML
+training on de-identified data, (4) cross-tenant lookalike audience generation — but only when the
+underlying customer also granted intelligence-tier consent. The two layers (tenant
+authorization + customer consent) must both exist before any cross-tenant data use.
+Guileo AI · System Brief · Page 10 of 18
+--- Page 11 ---
+6. Tech Stack & Required Accounts
+Production-grade choices that prioritize speed of iteration and operational reliability.
+6.1 Required vendor accounts
+VENDOR PURPOSE NOTES
+Vapi Voice AI runtime (telephony + STT
++ LLM + TTS)
+Per-minute pricing; one assistant
+per tenant or per vertical
+OpenAI GPT-4o-mini for agent brain & menu
+extraction
+Cheapest viable; upgradable to
+GPT-4o on Scale tier
+11Labs T ext-to-speech (3 voice options
+preset, custom cloning add-on)
+T urbo v2.5 model · low latency
+Deepgram Speech-to-text (multilingual, smart
+formatting)
+Nova-2 · faster than Whisper for
+telephony
+Twilio Phone numbers, WhatsApp
+Business, SMS, sub-accounts per
+tenant
+WhatsApp Business approval takes
+1–3 days
+Stripe Stripe Connect (orders) + Stripe
+Billing (SaaS sub)
+USD primary; BRL ready when
+MUUH Pay launches
+Supabase Postgres + Auth + Realtime + Edge
+Functions + Storage
+Pro plan $25/mo + usage;
+Enterprise for HIPAA tier
+Vercel Dashboard + privacy portal +
+tenant subdomains
+Wildcard domain support for
+*.guileo.ai
+n8n Orchestration (self-hosted or Cloud)Cloud is faster to start; self-host for
+cost at scale
+Hetzner / Railway /
+Modal
+Workers (ad sync + ML jobs) Modal best for ML scheduled jobs;
+Hetzner cheapest for always-on
+Resend or SendGridTransactional and marketing emailResend simpler API; SendGrid
+better deliverability at scale
+Ad audience destinations
+Guileo AI · System Brief · Page 11 of 18
+--- Page 12 ---
+VENDOR PURPOSE NOTES
+Meta Business +
+Google Ads + TikTok
+Per-tenant OAuth; long-lived
+tokens
+6.2 Application stack
+Frontend
+Next.js 14 · React 18 · T ypeScript · T ailwind CSS
+· Recharts · Supabase SSR · React Native
+(kitchen tablet app, future)
+Backend & Workers
+n8n workflows · Node.js + T ypeScript (ad sync)
+· Python 3.12 + scikit-learn + lifetimes (ML
+jobs) · Supabase Edge Functions for low-latency
+tasks
+Database & Storage
+Postgres 16 (Supabase) · pgvector for menu/
+intent embeddings · pg_trgm for fuzzy
+customer matching · Object storage for call
+recordings
+Observability & Ops
+Sentry (frontend errors) · Better Stack or
+Grafana (workers) · Cloudflare (DDoS / rate
+limit) · GitHub Actions (CI/CD)
+Guileo AI · System Brief · Page 12 of 18
+--- Page 13 ---
+7. Business Model
+Pure SaaS. Fixed subscription. No revenue share. Clear upsell path through add-ons.
+Why pure SaaS: T enants distrust intermediaries that take percentages (the DoorDash trauma).
+A fixed monthly fee is honest, predictable, and aligned. Revenue scales linearly with logos won;
+we keep our incentives clean. 
+7.1 Monetization model
+SOURCE TYPE NOTES
+Setup fee One-time, non-refundable
+after go-live
+Covers voice training, menu/calendar setup,
+integrations, staff training
+Monthly
+subscription
+Recurring via Stripe Billing30-day money-back guarantee on monthly fees
+Annual prepay 20% discount Reduces churn, improves cash flow
+Add-ons Recurring or one-time Ad campaign management, voice cloning, extra
+locations, POS integrations
+Managed
+services
+Per-engagement Custom workflows, white-glove onboarding for
+Enterprise
+7.2 Distribution & growth sequence
+PHASE 1 · MONTHS 0–2
+NYPDQ live + 2 anchor tenants via personal network
+Tribeca / Brazilian-NY community. One restaurant + one Âmago/Origem clinic. Zero ad spend. Brutal
+feedback. Product hardening.
+PHASE 2 · MONTHS 2–4
+Referral program (3 months free per tenant brought)
+5–10 paying tenants. Case-study videos with NYPDQ. Quantified ROI ("recovered $X in DoorDash fees,
+reactivated Y customers").
+PHASE 3 · MONTHS 4–8
+Targeted outbound to qualified ICPs
+Guileo AI · System Brief · Page 13 of 18
+--- Page 14 ---
+7.3 Defensibility
+Multi-tenant from day one — all data tenant-scoped, RLS enforced. No technical debt blocking
+tenant #2.
+Cross-channel identity unification — same customer across voice/WA/SMS gets one profile.
+Few competitors solve this.
+Auditable consent + DPAs — legal moat that scales with regulation, not against it.
+Aggregate dataset — across tenants, anonymized insights become salable to FMCG, equipment
+vendors, real-estate landlords.
+Vertical adaptation, not vertical companies — Slang.ai is restaurants-only; Arini is dental-
+only. Guileo crosses verticals on day one.
+Stripe Connect path to MUUH Pay — when MUUH Pay launches, swap the connector and keep
+the rails.
+Pizzerias, burger spots, cafés (high call volume). Aesthetic and dental clinics in BR-heavy zones. SDR or
+founder-led calls. 25–50 paying tenants.
+PHASE 4 · MONTH 8+
+Paid acquisition once CAC is known
+Meta + Google ads. SEO + content. Industry events. Scale to 100+ tenants and beyond.
+• 
+• 
+• 
+• 
+• 
+• 
+Guileo AI · System Brief · Page 14 of 18
+--- Page 15 ---
+8. Build Roadmap
+What's already built, what's next, and what's deferred.
+8.1 Already built (Phase 1 + 2)
+DONE Foundation
+Multi-tenant Postgres schema · 13 tables · row-
+level security · analytical views · NYPDQ seed
+(full menu, locations, campaigns, audiences)
+DONE Channel ingestion
+n8n omnichannel workflow · voice/WA/SMS
+routing · identity resolution · auto-grant
+essential consent · marketing engine (cron-
+driven)
+DONE B2B Dashboard
+Next.js + Supabase Realtime · Overview KPIs ·
+live order kanban · Customer 360 · campaigns ·
+ad audiences pages
+DONE Privacy Portal
+JWT magic-link · consent toggles · JSON data
+export · self-service deletion · DSR audit trail
+DONE Ad sync workers
+Meta Custom Audiences · Google Customer
+Match · SHA-256 hashing · intelligence-consent
+gating · 6-hour cron
+DONE ML jobs
+RFM segmentation · churn (gradient boosting +
+rule-based fallback) · LTV (BG/NBD + Gamma-
+Gamma) · daily pipeline
+8.2 Next sprint (Phase 3 — to enable tenant #2)
+PRIORITY ITEM WHY
+P0 Brand refactor: Tribeca → Guileo +
+vertical naming
+Public identity
+P0 Self-service tenant onboarding wizardT oday adding a tenant requires SQL — blocks
+every new logo
+P0 Stripe Connect Express + Stripe BillingMoney flow + SaaS subscriptions automated
+P1 T wilio sub-account auto-provisioningPer-tenant phone numbers and billing
+isolation
+Guileo AI · System Brief · Page 15 of 18
+--- Page 16 ---
+PRIORITY ITEM WHY
+P1 Voice persona picker (3 options) at
+onboarding
+T enant chooses agent name + voice without
+dev intervention
+P1 Clinic vertical schema additions (PHI
+fields, BAA flow)
+HIPAA tier ready before clinic #1
+P2 White-label theming per tenant
+subdomain
+Each tenant gets nypdq.guileo.ai branded
+P2 Menu PDF/image AI extraction (Growth
+tier feature)
+Onboarding accelerator for restaurants
+8.3 Deferred (Phase 4+)
+POS integrations (T oast, Square, Clover) — Scale tier feature
+PMS integrations (Dentrix, Eaglesoft, OpenDental) — Clinic Scale tier
+React Native kitchen tablet app
+WhatsApp Business template approval automation
+Recommendation engine in voice flow ("based on your last order")
+Outbound voice campaigns (NPS, reactivation, appointment confirmations)
+A/B testing framework for campaigns
+MUUH Pay swap-in for Brazil expansion
+Brazilian Portuguese vertical voice agents
+Slack/PagerDuty integration for tenant ops
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+Guileo AI · System Brief · Page 16 of 18
+--- Page 17 ---
+9. Appendix
+Operational notes, terminology, and reference.
+9.1 Glossary
+Tenant A business (restaurant, clinic, salon) using Guileo AI as a customer.
+Customer The end-user calling/messaging the tenant. Every customer belongs to exactly one
+tenant.
+CDP Customer Data Platform — the unified data layer storing customer profiles, orders,
+events, and consents.
+DPA Data Processing Agreement — legal contract between tenant and Guileo authorizing data
+use.
+DSR Data Subject Request — when a customer asks to view, export, correct, or delete their
+data.
+DSAR Data Subject Access Request — specifically the "show me everything you have on me"
+request.
+RLS Row-Level Security — Postgres feature enforcing tenant isolation at the database layer.
+RFM Recency / Frequency / Monetary — classic customer segmentation framework.
+LTV Lifetime Value — predicted total revenue from a customer over a time horizon.
+BAA Business Associate Agreement — HIPAA-required contract when handling PHI.
+PHI Protected Health Information — patient data subject to HIPAA.
+9.2 Operating principles
+Voice quality is non-negotiable. If the agent sounds robotic or stutters, no other feature
+matters.
+Multi-tenant from day one. Every table has a tenant_id. Every query filters by it. RLS is
+enforced, not optional.
+Consent is a feature, not paperwork. The privacy portal is part of the product, not the legal
+department.
+1. 
+2. 
+3. 
+Guileo AI · System Brief · Page 17 of 18
+--- Page 18 ---
+The tenant owns the customer relationship. Guileo never disintermediates the tenant.
+Customers always know who they're buying from.
+Adapter-first integrations. Every external system (POS, PMS, ad platform) goes through an
+adapter so swap-ins (e.g. MUUH Pay) cost a day, not a quarter.
+Cost-per-call is a product metric. Every call has a cost line item; we optimize this aggressively
+without compromising quality.
+9.3 Contact
+Operating company Tribeca Global Inc. (Delaware C-Corp)
+Product brand Guileo AI
+HQ Cuiabá, MT, Brazil · with NY operations
+Founder & CEO Luis Guilherme T eles da Costa
+This document is internal to Guileo AI / Tribeca Global Inc. and its prospective partners. All architecture and pricing
+details are subject to change as the product evolves.
+4. 
+5. 
+6. 
+Guileo AI · System Brief · Page 18 of 18
