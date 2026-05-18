@@ -1,6 +1,12 @@
-const supabaseUrl = 'https://rvqcajvsnvafzdmdotcw.supabase.co';
-const secretKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cWNhanZzbnZhZnpkbWRvdGN3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODgyNTIzMiwiZXhwIjoyMDk0NDAxMjMyfQ.xFDCgKg80lxdGtF6Hb_9J5fAv_jqel_l380Dln1b71A';
+require('dotenv').config({ path: '.env.local' });
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'https://rvqcajvsnvafzdmdotcw.supabase.co';
+const secretKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!secretKey) {
+  console.error("Error: SUPABASE_SERVICE_ROLE_KEY environment variable is not defined in .env.local");
+  process.exit(1);
+}
 async function run() {
   try {
     const url = `${supabaseUrl}/rest/v1/`;
