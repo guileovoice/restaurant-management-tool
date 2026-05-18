@@ -13,12 +13,16 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname()
   const router = useRouter()
-  const { isOnboarded, isAuthenticated, fetchTenantInfo } = useRestaurantStore()
+  const { isOnboarded, isAuthenticated, fetchTenantInfo, initializeSession } = useRestaurantStore()
   const isKitchen = pathname === '/kitchen'
 
   useEffect(() => {
-    fetchTenantInfo()
-  }, [fetchTenantInfo])
+    const init = async () => {
+      await initializeSession()
+      await fetchTenantInfo()
+    }
+    init()
+  }, [initializeSession, fetchTenantInfo])
 
   useEffect(() => {
     // If not authenticated, force login (unless already on auth pages)

@@ -24,13 +24,23 @@ export default function SignupPage() {
     e.preventDefault()
     setIsLoading(true)
     
-    // Mock signup process
-    setTimeout(() => {
+    const restaurantName = (e.target as any).restaurant?.value || ''
+    const email = (e.target as any).email?.value || ''
+    const password = (e.target as any).password?.value || ''
+
+    try {
+      const success = await signup(email, password, restaurantName)
+      if (success) {
+        toast.success('Account created! Welcome to Guileo AI.')
+        router.push('/onboarding')
+      } else {
+        toast.error('Registration failed. Please try again.')
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Registration failed. Please try again.')
+    } finally {
       setIsLoading(false)
-      signup()
-      toast.success('Account created! Welcome to Guileo AI.')
-      router.push('/onboarding')
-    }, 2000)
+    }
   }
 
   return (

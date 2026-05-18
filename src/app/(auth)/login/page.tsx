@@ -23,13 +23,22 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
     
-    // Mock authentication
-    setTimeout(() => {
+    const email = (e.target as any).email?.value || ''
+    const password = (e.target as any).password?.value || ''
+
+    try {
+      const success = await login(email, password)
+      if (success) {
+        toast.success('Welcome back!')
+        router.push('/overview')
+      } else {
+        toast.error('Could not sign you in. Please check your credentials.')
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Invalid credentials. Please try again.')
+    } finally {
       setIsLoading(false)
-      login()
-      toast.success('Welcome back, Alex!')
-      router.push('/overview')
-    }, 1500)
+    }
   }
 
   return (

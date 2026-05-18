@@ -18,8 +18,16 @@ interface VoiceSettings {
   language: 'en' | 'pt' | 'both'
 }
 
+interface Profile {
+  id: string
+  email: string
+  name: string
+  role: string
+}
+
 interface RestaurantState {
   info: RestaurantInfo | null
+  profile: Profile | null
   menu: MenuItem[]
   customers: Customer[]
   campaigns: Campaign[]
@@ -29,9 +37,10 @@ interface RestaurantState {
   isLoading: Record<string, boolean>
   
   // Actions
-  login: () => void
-  logout: () => void
-  signup: () => void
+  initializeSession: () => Promise<void>
+  login: (email?: string, password?: string) => Promise<boolean>
+  logout: () => Promise<void>
+  signup: (email?: string, password?: string, restaurantName?: string) => Promise<boolean>
   fetchTenantInfo: (slug?: string) => Promise<void>
   fetchMenu: () => Promise<void>
   fetchCustomers: () => Promise<void>
@@ -56,6 +65,7 @@ export const useRestaurantStore = create<RestaurantState>()(
         phone: '+1-718-555-9001',
         category: 'Brazilian Café'
       },
+      profile: null,
       menu: [],
       customers: [],
       campaigns: [],
@@ -65,20 +75,122 @@ export const useRestaurantStore = create<RestaurantState>()(
         language: 'both'
       },
       isOnboarded: true,
-      isAuthenticated: true, // Auto login for premium dashboard flow
+      isAuthenticated: true, // Default to true for visual flow, but will check session
       isLoading: {},
 
-      login: () => set({ isAuthenticated: true }),
-      logout: () => set({ isAuthenticated: false, isOnboarded: false, info: null }),
-      signup: () => set({ isAuthenticated: true }),
+      initializeSession: async () => {
+        if (get().isAuthenticated && get().info?.id) {
+          get().fetchMenu()
+          get().fetchCustomers()
+          get().fetchCampaigns()
+        }
+      },
 
-      fetchTenantInfo: async (slug = 'nypdq') => {
+      login: async (email, password) => {
+        if (!email || !password) {
+          // Fallback to mock session
+          set({ isAuthenticated: true })
+          return true
+        }
+
         try {
           const { data, error } = await supabase
-            .from('tenants')
+            .from('dashboard_users')
             .select('*')
-            .eq('slug', slug)
+            .eq('email', email)
+            .eq('password', password)
             .single()
+
+          if (error || !data) {
+            console.error("Login verification failed:", error?.message)
+            return false
+          }
+
+          set({
+            isAuthenticated: true,
+            isOnboarded: true,
+            profile: {
+              id: data.id,
+              email: data.email,
+              name: data.name,
+              role: data.role || 'staff'
+            }
+          })
+
+          await get().fetchTenantInfo()
+          get().fetchMenu()
+          get().fetchCustomers()
+          get().fetchCampaigns()
+          return true
+        } catch (e: any) {
+          console.error("Login exception:", e.message)
+          return false
+        }
+      },
+
+      logout: async () => {
+        set({ 
+          isAuthenticated: false, 
+          isOnboarded: false, 
+          info: null, 
+          profile: null,
+          menu: [],
+          customers: [],
+          campaigns: []
+        })
+      },
+
+      signup: async (email, password, restaurantName) => {
+        if (!email || !password) {
+          set({ isAuthenticated: true, isOnboarded: false })
+          return true
+        }
+
+        try {
+          const { data, error } = await supabase
+            .from('dashboard_users')
+            .insert([{
+              email,
+              password,
+              name: restaurantName || 'Owner',
+              role: 'owner'
+            }])
+            .select()
+            .single()
+
+          if (error) throw new Error(error.message)
+
+          set({
+            isAuthenticated: true,
+            isOnboarded: false,
+            profile: {
+              id: data.id,
+              email: data.email,
+              name: data.name,
+              role: data.role
+            }
+          })
+
+          await get().fetchTenantInfo()
+          return true
+        } catch (e: any) {
+          console.error("Signup failed:", e.message)
+          throw e
+        }
+      },
+
+      fetchTenantInfo: async (slugOrId = 'nypdq') => {
+        try {
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId)
+          let query = supabase.from('tenants').select('*')
+          
+          if (isUuid) {
+            query = query.eq('id', slugOrId)
+          } else {
+            query = query.eq('slug', slugOrId)
+          }
+          
+          const { data, error } = await query.single()
 
           if (error) {
             console.error("Error fetching tenant info:", error)
@@ -431,7 +543,9 @@ export const useRestaurantStore = create<RestaurantState>()(
       // Only persist local auth/onboard state to prevent stale DB caching
       partialize: (state) => ({ 
         isOnboarded: state.isOnboarded, 
-        isAuthenticated: state.isAuthenticated 
+        isAuthenticated: state.isAuthenticated,
+        profile: state.profile,
+        info: state.info
       }),
     }
   )
