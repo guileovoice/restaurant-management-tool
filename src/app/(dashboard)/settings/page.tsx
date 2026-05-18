@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { 
   Building2, 
   Mic2, 
@@ -27,8 +28,19 @@ import { cn } from '@/lib/utils'
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
 import { toast } from 'react-hot-toast'
 
-export default function SettingsPage() {
+function SettingsContent() {
   const { info, voiceSettings, updateInfo, updateVoiceSettings } = useRestaurantStore()
+  
+  const searchParams = useSearchParams()
+  const tabFromQuery = searchParams.get('tab') || 'business'
+  const [activeTab, setActiveTab] = useState('business')
+
+  useEffect(() => {
+    if (tabFromQuery) {
+      setActiveTab(tabFromQuery)
+    }
+  }, [tabFromQuery])
+
   const [localInfo, setLocalInfo] = useState(info || { name: '', address: '', phone: '', category: '' })
 
   // Voice settings states
@@ -43,8 +55,8 @@ export default function SettingsPage() {
 
   // Team states
   const [team, setTeam] = useState([
-    { name: 'Abeer', email: 'abeer@guileo.ai', role: 'Owner' },
-    { name: 'Sofia', email: 'sofia@guileo.ai', role: 'Manager' }
+    { name: 'ScalePods', email: 'info@scalepods.co', role: 'Owner' },
+    { name: 'Guileo', email: 'admguileo@gmail.com', role: 'Admin' }
   ])
   const [showAddMember, setShowAddMember] = useState(false)
   const [newMemberName, setNewMemberName] = useState('')
@@ -89,7 +101,7 @@ export default function SettingsPage() {
         subtitle="Manage your restaurant configuration, voice agent, and integrations."
       />
 
-      <Tabs defaultValue="business" className="flex flex-col lg:flex-row gap-8">
+      <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="flex flex-col lg:flex-row gap-8">
         <TabsList className="bg-surface border border-border flex flex-col items-stretch h-auto p-2 lg:w-[240px] shrink-0">
           {[
             { id: 'business', label: 'Business Info', icon: Building2 },
@@ -557,5 +569,13 @@ export default function SettingsPage() {
         </div>
       </Tabs>
     </div>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-text-muted">Loading settings...</div>}>
+      <SettingsContent />
+    </Suspense>
   )
 }
