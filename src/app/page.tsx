@@ -40,7 +40,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
-import { supabase } from '@/lib/supabaseClient'
+import { supabase, upsertCustomerForOrder } from '@/lib/supabaseClient'
 import { toast } from 'react-hot-toast'
 
 export default function ProfessionalLandingPage() {
@@ -120,6 +120,14 @@ export default function ProfessionalLandingPage() {
       const orderId = crypto.randomUUID()
       const tenantId = info?.id || '395b50b9-9504-47ce-a8be-3b5c3ff22315'
 
+      // 1.5. Upsert customer and get customer_id
+      const customerId = await upsertCustomerForOrder(
+        tenantId,
+        customerName,
+        customerPhone,
+        finalTotal
+      )
+
       // 2. Insert into orders table in Supabase
       const { error: orderErr } = await supabase
         .from('orders')
@@ -127,6 +135,7 @@ export default function ProfessionalLandingPage() {
           id: orderId,
           order_number: orderNum,
           tenant_id: tenantId,
+          customer_id: customerId,
           customer_name: customerName,
           customer_phone: customerPhone,
           subtotal: cartTotal,

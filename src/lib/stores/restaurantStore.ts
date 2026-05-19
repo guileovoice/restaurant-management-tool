@@ -256,40 +256,65 @@ export const useRestaurantStore = create<RestaurantState>()(
       fetchCustomers: async () => {
         const tenant_id = get().info?.id || DEFAULT_TENANT_ID
         try {
-          const { data, error } = await supabase
+          const { data: customersData, error: customersErr } = await supabase
             .from('customers')
             .select('*')
             .eq('tenant_id', tenant_id)
 
-          if (error) {
-            console.error("Error fetching customers:", error)
+          if (customersErr) {
+            console.error("Error fetching customers:", customersErr)
             return
           }
 
-          const mappedCustomers: Customer[] = (data || []).map(c => ({
-            id: c.id,
-            tenantId: c.tenant_id,
-            name: c.name,
-            phone: c.phone || '',
-            email: c.email || '',
-            preferredChannel: (c.preferred_channel as any) || 'VOICE',
-            consents: typeof c.consents === 'object' && c.consents ? {
-              essential: c.consents.essential ?? true,
-              marketing: c.consents.marketing ?? false,
-              intelligence: c.consents.intelligence ?? false
-            } : { essential: true, marketing: false, intelligence: false },
-            totalOrders: c.total_orders || 0,
-            totalSpent: Number(c.ltv || 0),
-            averageOrderValue: c.total_orders ? Number(c.ltv || 0) / c.total_orders : 0,
-            lastOrderAt: c.last_order_at || c.created_at,
-            firstOrderAt: c.created_at,
-            churnRisk: (c.churn_risk as any) || 'LOW',
-            ltv: Number(c.ltv || 0),
-            rfmSegment: c.rfm_segment || 'NEW',
-            orders: [],
-            calls: [],
-            createdAt: c.created_at
-          }))
+          // Fetch all orders to compute real-time sums for LTV
+          const { data: ordersData } = await supabase
+            .from('orders')
+            .select('customer_id, total, status')
+            .eq('tenant_id', tenant_id)
+
+          const customerStats: Record<string, { totalOrders: number; totalSpent: number }> = {}
+          if (ordersData) {
+            ordersData.forEach(o => {
+              if (!o.customer_id) return
+              if (o.status === 'CANCELLED') return
+              if (!customerStats[o.customer_id]) {
+                customerStats[o.customer_id] = { totalOrders: 0, totalSpent: 0 }
+              }
+              customerStats[o.customer_id].totalOrders += 1
+              customerStats[o.customer_id].totalSpent += Number(o.total || 0)
+            })
+          }
+
+          const mappedCustomers: Customer[] = (customersData || []).map(c => {
+            const stats = customerStats[c.id] || { totalOrders: 0, totalSpent: 0 }
+            const totalOrders = stats.totalOrders || c.total_orders || 0
+            const totalSpent = stats.totalSpent || Number(c.ltv || 0)
+
+            return {
+              id: c.id,
+              tenantId: c.tenant_id,
+              name: c.name,
+              phone: c.phone || '',
+              email: c.email || '',
+              preferredChannel: (c.preferred_channel as any) || 'VOICE',
+              consents: typeof c.consents === 'object' && c.consents ? {
+                essential: c.consents.essential ?? true,
+                marketing: c.consents.marketing ?? false,
+                intelligence: c.consents.intelligence ?? false
+              } : { essential: true, marketing: false, intelligence: false },
+              totalOrders: totalOrders,
+              totalSpent: totalSpent,
+              averageOrderValue: totalOrders ? totalSpent / totalOrders : 0,
+              lastOrderAt: c.last_order_at || c.created_at,
+              firstOrderAt: c.created_at,
+              churnRisk: (c.churn_risk as any) || 'LOW',
+              ltv: totalSpent,
+              rfmSegment: c.rfm_segment || 'NEW',
+              orders: [],
+              calls: [],
+              createdAt: c.created_at
+            }
+          })
 
           set({ customers: mappedCustomers })
         } catch (e) {
