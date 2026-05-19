@@ -654,7 +654,7 @@ export default function ProfessionalLandingPage() {
                 <span className="font-black text-base font-mono">${cartTotal.toFixed(2)}</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="bg-zinc-950 border-t-2 border-amber-500 h-[92vh] rounded-t-[32px] p-6 flex flex-col text-white">
+            <SheetContent side="right" className="bg-zinc-950 border-l border-zinc-900 w-full sm:max-w-md p-5 flex flex-col text-white h-full">
               <SheetHeader className="mb-4 border-b border-zinc-900 pb-3">
                 <SheetTitle className="text-lg font-black uppercase tracking-tighter text-white flex items-center justify-between">
                   Culinary Order Basket
@@ -662,10 +662,10 @@ export default function ProfessionalLandingPage() {
                 </SheetTitle>
               </SheetHeader>
 
-              <div className="flex-1 overflow-y-auto space-y-6 pr-2">
+              <div className="flex-1 overflow-y-auto space-y-5 pr-2">
                 
                 {/* Cart Items list */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block">Dished items</span>
                   {cart.map(item => {
                     const details = getItem(item.id)
@@ -676,9 +676,9 @@ export default function ProfessionalLandingPage() {
                           <p className="text-[9px] text-zinc-400 uppercase tracking-widest font-mono">${details.price.toFixed(2)} each</p>
                         </div>
                         <div className="flex items-center bg-zinc-900 rounded-xl border border-zinc-800">
-                          <button className="p-2 text-zinc-400 hover:text-amber-500" onClick={() => removeFromCart(item.id)}><Minus className="w-3.5 h-3.5" /></button>
+                          <button className="p-1.5 text-zinc-400 hover:text-amber-500" onClick={() => removeFromCart(item.id)}><Minus className="w-3 h-3" /></button>
                           <span className="text-xs font-black text-white w-6 text-center">{item.quantity}</span>
-                          <button className="p-2 text-zinc-400 hover:text-amber-500" onClick={() => addToCart(item.id)}><Plus className="w-3.5 h-3.5" /></button>
+                          <button className="p-1.5 text-zinc-400 hover:text-amber-500" onClick={() => addToCart(item.id)}><Plus className="w-3 h-3" /></button>
                         </div>
                       </div>
                     )
@@ -686,29 +686,29 @@ export default function ProfessionalLandingPage() {
                 </div>
 
                 {/* Contact Information Form */}
-                <div className="pt-6 border-t border-zinc-900 space-y-4">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block">Diner & Delivery Details</span>
+                <div className="pt-5 border-t border-zinc-900 space-y-3">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block">Diner & Details</span>
                   
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="custName" className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Full Name *</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="custName" className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">Full Name *</Label>
                       <Input 
                         id="custName" 
                         value={customerName} 
                         onChange={(e) => setCustomerName(e.target.value)} 
                         placeholder="John Doe" 
-                        className="bg-zinc-900 border-zinc-800 text-xs h-11 rounded-xl text-white"
+                        className="bg-zinc-900 border-zinc-800 text-xs h-10 rounded-xl text-white"
                         required
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="custPhone" className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Phone Number *</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="custPhone" className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">Phone Number *</Label>
                       <Input 
                         id="custPhone" 
                         value={customerPhone} 
                         onChange={(e) => setCustomerPhone(e.target.value)} 
                         placeholder="718-555-0199" 
-                        className="bg-zinc-900 border-zinc-800 text-xs h-11 rounded-xl text-white"
+                        className="bg-zinc-900 border-zinc-800 text-xs h-10 rounded-xl text-white"
                         required
                       />
                     </div>
@@ -717,7 +717,7 @@ export default function ProfessionalLandingPage() {
                   <div className="flex bg-zinc-900 rounded-xl p-1 border border-zinc-800">
                     <button 
                       className={cn(
-                        "flex-1 flex items-center justify-center gap-2 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all",
+                        "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all",
                         orderType === 'PICKUP' ? "bg-amber-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
                       )}
                       onClick={() => setOrderType('PICKUP')}
@@ -726,58 +726,58 @@ export default function ProfessionalLandingPage() {
                     </button>
                     <button 
                       className={cn(
-                        "flex-1 flex items-center justify-center gap-2 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all",
+                        "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all",
                         orderType === 'DELIVERY' ? "bg-amber-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
                       )}
                       onClick={() => setOrderType('DELIVERY')}
                     >
-                      <Truck className="w-3 h-3" /> Courier Delivery
+                      <Truck className="w-3 h-3" /> Delivery
                     </button>
                   </div>
 
                   {orderType === 'DELIVERY' && (
-                    <div className="space-y-1.5">
-                      <Label htmlFor="delAddress" className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Delivery Address *</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="delAddress" className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">Delivery Address *</Label>
                       <Input 
                         id="delAddress" 
                         value={address} 
                         onChange={(e) => setAddress(e.target.value)} 
                         placeholder="3101 31st Ave, Astoria, NY" 
-                        className="bg-zinc-900 border-zinc-800 text-xs h-11 rounded-xl text-white"
+                        className="bg-zinc-900 border-zinc-800 text-xs h-10 rounded-xl text-white"
                         required
                       />
                     </div>
                   )}
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="orderNotes" className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Cooking Requests</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="orderNotes" className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">Cooking Requests</Label>
                     <Input 
                       id="orderNotes" 
                       value={notes} 
                       onChange={(e) => setNotes(e.target.value)} 
                       placeholder="Extra crispy pastries, garlic sauce, etc..." 
-                      className="bg-zinc-900 border-zinc-800 text-xs h-11 rounded-xl text-white"
+                      className="bg-zinc-900 border-zinc-800 text-xs h-10 rounded-xl text-white"
                     />
                   </div>
                 </div>
 
                 {/* Subtotals & Fees */}
-                <div className="space-y-2 pt-6 border-t border-zinc-900">
-                  <div className="flex justify-between text-[10px] text-zinc-500 uppercase tracking-wider font-bold">
+                <div className="space-y-2 pt-5 border-t border-zinc-900">
+                  <div className="flex justify-between text-[9px] text-zinc-500 uppercase tracking-wider font-bold">
                     <span>Subtotal</span>
                     <span className="font-mono text-white">${cartTotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-[10px] text-zinc-500 uppercase tracking-wider font-bold">
+                  <div className="flex justify-between text-[9px] text-zinc-500 uppercase tracking-wider font-bold">
                     <span>NY Sales Tax (8.875%)</span>
                     <span className="font-mono text-white">${tax.toFixed(2)}</span>
                   </div>
                   {orderType === 'DELIVERY' && (
-                    <div className="flex justify-between text-[10px] text-zinc-500 uppercase tracking-wider font-bold">
+                    <div className="flex justify-between text-[9px] text-zinc-500 uppercase tracking-wider font-bold">
                       <span>Delivery Fee</span>
                       <span className="font-mono text-white">$2.50</span>
                     </div>
                   )}
-                  <div className="flex justify-between pt-4 text-lg font-black text-white uppercase tracking-tighter border-t border-zinc-900 mt-2">
+                  <div className="flex justify-between pt-3 text-base font-black text-white uppercase tracking-tighter border-t border-zinc-900 mt-2">
                     <span>Total Bill</span>
                     <span className="text-amber-500 font-mono">${finalTotal.toFixed(2)}</span>
                   </div>
@@ -787,7 +787,7 @@ export default function ProfessionalLandingPage() {
               {/* Confirm button */}
               <div className="pt-4 mt-auto border-t border-zinc-900">
                 <Button 
-                  className="w-full h-16 bg-amber-500 hover:bg-amber-600 text-black font-extrabold text-sm uppercase tracking-widest rounded-2xl shadow-xl shadow-amber-500/20"
+                  className="w-full h-12 bg-amber-500 hover:bg-amber-600 text-black font-extrabold text-xs uppercase tracking-widest rounded-xl shadow-xl shadow-amber-500/20"
                   onClick={handleCheckoutClick}
                 >
                   Proceed to Checkout <ChevronRight className="w-4 h-4 ml-2" />
@@ -808,29 +808,29 @@ export default function ProfessionalLandingPage() {
           </DialogHeader>
 
           {/* Interactive Credit Card Mockup */}
-          <div className="w-full aspect-[1.586/1] rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-600 to-amber-700 p-6 flex flex-col justify-between text-black relative shadow-2xl overflow-hidden mb-6">
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/5 blur-xl pointer-events-none" />
+          <div className="max-w-[280px] w-full mx-auto aspect-[1.586/1] rounded-xl bg-gradient-to-tr from-amber-500 via-amber-600 to-amber-700 p-4 flex flex-col justify-between text-black relative shadow-2xl overflow-hidden mb-4">
+            <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-white/5 blur-xl pointer-events-none" />
             
             <div className="flex justify-between items-start">
-              <span className="text-xs font-black uppercase tracking-[0.2em]">NYPDQ Premium</span>
-              <span className="font-bold text-xs">VISA</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.2em]">NYPDQ Premium</span>
+              <span className="font-bold text-[10px]">VISA</span>
             </div>
 
-            <div className="space-y-4">
-              <div className="text-lg font-mono font-bold tracking-widest">
+            <div className="space-y-3">
+              <div className="text-sm font-mono font-bold tracking-widest text-center">
                 {cardNumber ? cardNumber.replace(/(\d{4})/g, '$1 ').trim() : '•••• •••• •••• ••••'}
               </div>
 
               <div className="flex justify-between items-end">
                 <div>
-                  <span className="text-[8px] uppercase tracking-widest text-zinc-800 font-bold block">Card Holder</span>
-                  <span className="text-xs font-bold uppercase tracking-tight truncate max-w-[140px] block">
+                  <span className="text-[7px] uppercase tracking-widest text-zinc-900 font-bold block">Card Holder</span>
+                  <span className="text-[10px] font-bold uppercase tracking-tight truncate max-w-[120px] block">
                     {customerName || 'YOUR NAME'}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[8px] uppercase tracking-widest text-zinc-800 font-bold block">Expiry</span>
-                  <span className="text-xs font-mono font-bold">{cardExpiry || 'MM/YY'}</span>
+                  <span className="text-[7px] uppercase tracking-widest text-zinc-900 font-bold block">Expiry</span>
+                  <span className="text-[10px] font-mono font-bold">{cardExpiry || 'MM/YY'}</span>
                 </div>
               </div>
             </div>

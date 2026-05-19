@@ -34,17 +34,17 @@ export async function upsertCustomerForOrder(
         .or(`customer_id.eq.${existingCust.id},customer_phone.eq.${phoneToQuery}`)
 
       const nonCancelledOrders = (customerOrders || []).filter(o => o.status !== 'CANCELLED')
-      const totalOrders = nonCancelledOrders.length + 1
       const totalSpent = nonCancelledOrders.reduce((sum, o) => sum + Number(o.total || 0), 0) + orderTotal
 
-      await supabase
+      const { error: updateErr } = await supabase
         .from('customers')
         .update({
-          total_orders: totalOrders,
           ltv: totalSpent,
           last_order_at: new Date().toISOString()
         })
         .eq('id', existingCust.id)
+
+      if (updateErr) throw updateErr
 
       return existingCust.id
     } else {
@@ -63,19 +63,16 @@ export async function upsertCustomerForOrder(
           churn_risk: 'LOW',
           ltv: orderTotal,
           rfm_segment: 'New',
-          total_orders: 1,
           created_at: new Date().toISOString(),
           last_order_at: new Date().toISOString()
         })
 
-      if (insertErr) {
-        console.error("Error inserting new customer:", insertErr)
-      }
+      if (insertErr) throw insertErr
       return newCustomerId
     }
   } catch (err) {
     console.error("Error in upsertCustomerForOrder:", err)
-    return null
+    throw err
   }
 }
 
