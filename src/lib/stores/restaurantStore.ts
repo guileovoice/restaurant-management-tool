@@ -269,26 +269,30 @@ export const useRestaurantStore = create<RestaurantState>()(
           // Fetch all orders to compute real-time sums for LTV
           const { data: ordersData } = await supabase
             .from('orders')
-            .select('customer_id, total, status')
+            .select('id, customer_id, customer_phone, total, status')
             .eq('tenant_id', tenant_id)
 
-          const customerStats: Record<string, { totalOrders: number; totalSpent: number }> = {}
-          if (ordersData) {
-            ordersData.forEach(o => {
-              if (!o.customer_id) return
-              if (o.status === 'CANCELLED') return
-              if (!customerStats[o.customer_id]) {
-                customerStats[o.customer_id] = { totalOrders: 0, totalSpent: 0 }
-              }
-              customerStats[o.customer_id].totalOrders += 1
-              customerStats[o.customer_id].totalSpent += Number(o.total || 0)
-            })
-          }
-
           const mappedCustomers: Customer[] = (customersData || []).map(c => {
-            const stats = customerStats[c.id] || { totalOrders: 0, totalSpent: 0 }
-            const totalOrders = stats.totalOrders || c.total_orders || 0
-            const totalSpent = stats.totalSpent || Number(c.ltv || 0)
+            const normalizedCustPhone = c.phone ? c.phone.trim() : ''
+
+            // Gather all non-cancelled orders matching either customer_id or phone
+            const matchedOrders = (ordersData || []).filter(o => {
+              if (o.status === 'CANCELLED') return false
+              const matchesId = o.customer_id && o.customer_id === c.id
+              const matchesPhone = o.customer_phone && o.customer_phone.trim() === normalizedCustPhone
+              return matchesId || matchesPhone
+            })
+
+            // Deduplicate orders by order ID
+            const uniqueOrdersMap = new Map()
+            matchedOrders.forEach(o => {
+              const orderId = o.id || Math.random().toString()
+              uniqueOrdersMap.set(orderId, o)
+            })
+            const uniqueOrders = Array.from(uniqueOrdersMap.values())
+
+            const totalOrders = uniqueOrders.length || c.total_orders || 0
+            const totalSpent = uniqueOrders.reduce((sum, o) => sum + Number(o.total || 0), 0) || Number(c.ltv || 0)
 
             return {
               id: c.id,
