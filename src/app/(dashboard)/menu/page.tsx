@@ -45,9 +45,16 @@ export default function MenuPage() {
   const [preparationTime, setPreparationTime] = useState('5')
   const [allergens, setAllergens] = useState('')
 
+  const [isMounted, setIsMounted] = useState(false)
+
   useEffect(() => {
+    setIsMounted(true)
     fetchMenu(currentPage, pageSize)
   }, [fetchMenu, currentPage])
+
+  if (!isMounted) {
+    return null // Prevent hydration mismatch on initial render
+  }
 
   // Because of server-side pagination, categories are limited to the current page unless fetched completely. 
   // For a fully robust category filter, you would move filtering to the server, but for now we map what we have.
