@@ -23,10 +23,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { cn } from '@/lib/utils'
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
 import { Label } from '@/components/ui/label'
+import { useOrdersStore } from '@/lib/stores/ordersStore'
 
 export default function PublicOrderPage() {
   const { tenant } = useParams()
   const { menu, info } = useRestaurantStore()
+  const { addOrder } = useOrdersStore()
   const [cart, setCart] = useState<{id: string, quantity: number}[]>([])
   const [orderType, setOrderType] = useState<'PICKUP' | 'DELIVERY'>('PICKUP')
   const [activeCategory, setActiveCategory] = useState('All')
@@ -49,6 +51,44 @@ export default function PublicOrderPage() {
   const getItem = (id: string) => menu.find(i => i.id === id)!
   const cartTotal = cart.reduce((sum, item) => sum + (getItem(item.id).price * item.quantity), 0)
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleCheckout = async () => {
+    setIsSubmitting(true)
+    const orderItems = cart.map(item => {
+      const details = getItem(item.id)
+      return {
+         id: item.id,
+         name: details.name,
+         quantity: item.quantity,
+         price: details.price,
+         notes: ''
+      }
+    })
+    
+    const newOrder = {
+      id: crypto.randomUUID(),
+      orderNumber: Math.floor(1000 + Math.random() * 9000).toString(),
+      customerName: 'Guest User',
+      customerPhone: '',
+      items: orderItems,
+      subtotal: cartTotal,
+      tax: cartTotal * 0.08875,
+      deliveryFee: orderType === 'DELIVERY' ? 2.5 : 0,
+      total: cartTotal * 1.08875 + (orderType === 'DELIVERY' ? 2.5 : 0),
+      status: 'PENDING',
+      type: orderType,
+      channel: 'WEB',
+      address: '',
+      paymentStatus: 'PAID',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+    
+    await addOrder(newOrder as any)
+    setIsSubmitting(false)
+    setStep('SUCCESS')
+  }
 
   if (step === 'SUCCESS') {
     return (
@@ -275,10 +315,11 @@ export default function PublicOrderPage() {
 
               <div className="pt-6 mt-auto">
                 <Button 
+                  disabled={isSubmitting}
                   className="w-full h-16 bg-primary hover:bg-primary-dark text-white font-black text-xl uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20"
-                  onClick={() => setStep('SUCCESS')}
+                  onClick={handleCheckout}
                 >
-                  Confirm & Pay <ChevronRight className="w-6 h-6 ml-2" />
+                  {isSubmitting ? 'Processing...' : <><span className="mr-2">Confirm & Pay</span> <ChevronRight className="w-6 h-6" /></>}
                 </Button>
                 <p className="text-[10px] text-center text-text-muted mt-4">
                   By placing this order you agree to our Terms of Service.

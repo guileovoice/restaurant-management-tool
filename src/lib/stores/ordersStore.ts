@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { Order, OrderStatus } from '../types'
 import { supabase } from '../supabaseClient'
+import { useRestaurantStore } from './restaurantStore'
 
 interface OrdersState {
   orders: Order[]
@@ -22,8 +23,8 @@ export const useOrdersStore = create<OrdersState>((set) => ({
       // Fetch all orders and join their order_items in a single fast query
       const { data: dbOrders, error: ordersErr } = await supabase
         .from('orders')
-        .select('*, order_items(*)')
-        .order('created_at', { ascending: false })
+        .select('*')
+        .order('order_place_at', { ascending: false })
 
       if (ordersErr) {
         console.error("[useOrdersStore] Error fetching orders joined with items:", ordersErr)
@@ -34,6 +35,8 @@ export const useOrdersStore = create<OrdersState>((set) => ({
       console.log(`[useOrdersStore] Successfully loaded ${dbOrders?.length || 0} orders from Supabase:`, dbOrders)
 
       // Map db orders directly to the frontend Order interface
+      const menu = useRestaurantStore.getState().menu;
+
       const mappedOrders: Order[] = (dbOrders || []).map(o => {
         let orderStatus = o.status as OrderStatus
         let orderNotes = o.notes || ''
@@ -50,13 +53,16 @@ export const useOrdersStore = create<OrdersState>((set) => ({
           customerId: o.customer_id || '',
           customerName: o.customer_name || '',
           customerPhone: o.customer_phone || '',
-          items: (o.order_items || []).map((item: any) => ({
-            id: item.id,
-            name: item.name,
-            quantity: item.quantity,
-            price: Number(item.price),
-            notes: item.notes || ''
-          })),
+          items: (Array.isArray(o.order_items) ? o.order_items : (typeof o.order_items === 'string' ? JSON.parse(o.order_items || '[]') : [])).map((item: any) => {
+            const menuItem = menu.find(m => m.id === item.id) || menu.find(m => m.name === item.name);
+            return {
+              id: item.id || Math.random().toString(),
+              name: item.name || menuItem?.name || 'Unknown Item',
+              quantity: item.quantity || 1,
+              price: Number(item.price) || menuItem?.price || 0,
+              notes: item.notes || ''
+            };
+          }),
           subtotal: Number(o.subtotal || 0),
           deliveryFee: Number(o.delivery_fee || 0),
           tax: Number(o.tax || 0),
@@ -67,7 +73,7 @@ export const useOrdersStore = create<OrdersState>((set) => ({
           address: o.address || '',
           notes: orderNotes,
           paymentStatus: o.payment_status as any,
-          createdAt: o.created_at,
+          createdAt: o.order_place_at || o.created_at,
           updatedAt: o.updated_at,
           estimatedReadyAt: o.estimated_ready_at || undefined
         }
@@ -164,28 +170,15 @@ export const useOrdersStore = create<OrdersState>((set) => ({
         payment_status: order.paymentStatus,
         estimated_ready_at: order.estimatedReadyAt,
         created_at: order.createdAt || new Date().toISOString(),
-        updated_at: order.updatedAt || new Date().toISOString()
+        updated_at: order.updatedAt || new Date().toISOString(),
+        order_place_at: order.createdAt || new Date().toISOString(),
+        order_items: JSON.stringify(order.items || [])
       }
 
       const { error: orderErr } = await supabase.from('orders').insert([dbOrder])
       if (orderErr) {
         console.error("Error adding order in Supabase:", orderErr)
         return
-      }
-
-      if (order.items && order.items.length > 0) {
-        const dbItems = order.items.map(item => ({
-          order_id: order.id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          notes: item.notes || ''
-        }))
-
-        const { error: itemsErr } = await supabase.from('order_items').insert(dbItems)
-        if (itemsErr) {
-          console.error("Error adding order items in Supabase:", itemsErr)
-        }
       }
 
       // Update local state

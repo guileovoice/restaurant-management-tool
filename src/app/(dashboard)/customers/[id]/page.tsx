@@ -61,9 +61,9 @@ export default function CustomerDetailPage() {
         // Fetch orders for this customer (matching either customer_id or phone to be safe)
         const { data: dbOrders, error: ordersErr } = await supabase
           .from('orders')
-          .select('*, order_items(*)')
+          .select('*')
           .or(`customer_id.eq.${customerId},customer_phone.eq.${customerPhone}`)
-          .order('created_at', { ascending: false })
+          .order('order_place_at', { ascending: false })
 
         if (ordersErr) {
           console.error("Error fetching customer orders:", ordersErr)
@@ -84,13 +84,16 @@ export default function CustomerDetailPage() {
               customerId: o.customer_id || '',
               customerName: o.customer_name || '',
               customerPhone: o.customer_phone || '',
-              items: (o.order_items || []).map((item: any) => ({
-                id: item.id,
-                name: item.name,
-                quantity: item.quantity,
-                price: Number(item.price),
-                notes: item.notes || ''
-              })),
+              items: (Array.isArray(o.order_items) ? o.order_items : (typeof o.order_items === 'string' ? JSON.parse(o.order_items || '[]') : [])).map((item: any) => {
+                const menuItem = menu.find(m => m.id === item.id) || menu.find(m => m.name === item.name);
+                return {
+                  id: item.id || Math.random().toString(),
+                  name: item.name || menuItem?.name || 'Unknown Item',
+                  quantity: item.quantity || 1,
+                  price: Number(item.price) || menuItem?.price || 0,
+                  notes: item.notes || ''
+                };
+              }),
               subtotal: Number(o.subtotal || 0),
               deliveryFee: Number(o.delivery_fee || 0),
               tax: Number(o.tax || 0),
@@ -101,7 +104,7 @@ export default function CustomerDetailPage() {
               address: o.address || '',
               notes: orderNotes,
               paymentStatus: o.payment_status,
-              createdAt: o.created_at,
+              createdAt: o.order_place_at || o.created_at,
               updatedAt: o.updated_at,
               estimatedReadyAt: o.estimated_ready_at || undefined
             }
