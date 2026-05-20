@@ -50,6 +50,7 @@ interface RestaurantState {
   addMenuItem: (item: MenuItem) => Promise<void>
   updateMenuItem: (id: string, item: Partial<MenuItem>) => Promise<void>
   deleteMenuItem: (id: string) => Promise<void>
+  bulkAddMenuItems: (items: any[]) => Promise<void>
   updateVoiceSettings: (settings: VoiceSettings) => Promise<void>
 }
 
@@ -526,21 +527,34 @@ export const useRestaurantStore = create<RestaurantState>()(
 
       deleteMenuItem: async (id) => {
         try {
-          const { error } = await supabase
-            .from('menu_items')
-            .delete()
-            .eq('id', id)
-
-          if (error) {
-            console.error("Error deleting menu item in Supabase:", error)
-            return
-          }
-
-          set((state) => ({
-            menu: state.menu.filter(item => item.id !== id)
-          }))
+          const { error } = await supabase.from('menu_items').delete().eq('id', id)
+          if (error) throw new Error(error.message)
+          set(state => ({ menu: state.menu.filter(i => i.id !== id) }))
         } catch (e) {
-          console.error("Catch in deleteMenuItem:", e)
+          console.error("Error deleting menu item:", e)
+        }
+      },
+
+      bulkAddMenuItems: async (items: any[]) => {
+        const tenant_id = get().info?.id || DEFAULT_TENANT_ID
+        const mappedItems = items.map(item => ({
+          tenant_id,
+          name: item.name || item.Name || 'Unnamed Item',
+          description: item.description || item.Description || '',
+          price: parseFloat(item.price || item.Price) || 0,
+          category: item.category || item.Category || 'General',
+          available: true,
+          popular: false,
+          preparation_time: 5
+        }))
+
+        try {
+          const { error } = await supabase.from('menu_items').insert(mappedItems)
+          if (error) throw error
+          await get().fetchMenu()
+        } catch (e) {
+          console.error("Error in bulkAddMenuItems:", e)
+          throw e
         }
       },
 

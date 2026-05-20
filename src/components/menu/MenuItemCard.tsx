@@ -59,9 +59,9 @@ export function MenuItemCard({ item, onEdit, onToggle, onDelete }: MenuItemCardP
           <div className="flex items-center gap-1 text-[10px] font-bold text-text-muted bg-surface2 px-1.5 py-0.5 rounded">
             <Clock className="w-3 h-3" /> {item.preparationTime} MIN
           </div>
-          {item.allergens?.map((allergen) => (
+          {(Array.isArray(item.allergens) ? item.allergens : (typeof (item.allergens as any) === 'string' && item.allergens ? (item.allergens as any).split(',') : [])).map((allergen: string) => (
             <div key={allergen} className="flex items-center gap-1 text-[10px] font-bold text-amber-500/80 bg-amber-500/10 px-1.5 py-0.5 rounded">
-              <AlertCircle className="w-3 h-3" /> {allergen.toUpperCase()}
+              <AlertCircle className="w-3 h-3" /> {String(allergen).trim().toUpperCase()}
             </div>
           ))}
         </div>

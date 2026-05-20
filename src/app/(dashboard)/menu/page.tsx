@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Plus, Sparkles, Search, SlidersHorizontal } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
+import Papa from 'papaparse'
+import { Plus, Sparkles, Search, SlidersHorizontal, Upload } from 'lucide-react'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { MenuItemCard } from '@/components/menu/MenuItemCard'
 import { Button } from '@/components/ui/button'
@@ -23,9 +24,11 @@ import { toast } from 'react-hot-toast'
 import { MenuItem } from '@/lib/types'
 
 export default function MenuPage() {
-  const { menu, fetchMenu, addMenuItem, updateMenuItem, deleteMenuItem } = useRestaurantStore()
+  const { menu, fetchMenu, addMenuItem, updateMenuItem, deleteMenuItem, bulkAddMenuItems } = useRestaurantStore()
   const [activeCategory, setActiveCategory] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   // Modal / Form state
   const [isAddEditOpen, setIsAddEditOpen] = useState(false)
@@ -48,10 +51,42 @@ export default function MenuPage() {
 
   const filteredItems = menu.filter(item => {
     const matchesCategory = activeCategory === 'All' || item.category === activeCategory
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesSearch = item.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          item.description?.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        try {
+          if (results.data && results.data.length > 0) {
+            await bulkAddMenuItems(results.data)
+            toast.success(`Successfully imported ${results.data.length} menu items!`)
+          } else {
+            toast.error("No valid data found in the CSV.")
+          }
+        } catch (error) {
+          toast.error("Failed to import menu items.")
+          console.error(error)
+        } finally {
+          setIsUploading(false)
+          if (fileInputRef.current) fileInputRef.current.value = ''
+        }
+      },
+      error: (err) => {
+        toast.error("Error parsing CSV file")
+        console.error(err)
+        setIsUploading(false)
+      }
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -100,9 +135,27 @@ export default function MenuPage() {
         subtitle={`${menu.length} items across ${categories.length - 1} categories.`}
         actions={
           <div className="flex gap-3">
-            <Button variant="outline" className="border-amber-500/20 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 gap-2">
-              <Sparkles className="w-4 h-4" />
-              Import from PDF
+            <input 
+              type="file" 
+              accept=".csv" 
+              ref={fileInputRef} 
+              onChange={handleFileUpload} 
+              className="hidden" 
+            />
+            <Button 
+              variant="outline" 
+              className="border-amber-500/20 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 gap-2"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+            >
+              {isUploading ? (
+                <span className="flex items-center gap-2">Importing...</span>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4" />
+                  Import from CSV
+                </>
+              )}
             </Button>
             <Button 
               className="bg-primary hover:bg-primary-dark text-white gap-2 font-semibold"
