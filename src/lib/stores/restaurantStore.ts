@@ -42,7 +42,8 @@ interface RestaurantState {
   logout: () => Promise<void>
   signup: (email?: string, password?: string, restaurantName?: string) => Promise<boolean>
   fetchTenantInfo: (slug?: string) => Promise<void>
-  fetchMenu: () => Promise<void>
+  menuTotalCount: number
+  fetchMenu: (page?: number, pageSize?: number) => Promise<void>
   fetchCustomers: () => Promise<void>
   fetchCampaigns: () => Promise<void>
   setOnboardingData: (data: { info: RestaurantInfo; menu: MenuItem[]; voice: VoiceSettings }) => Promise<void>
@@ -68,6 +69,7 @@ export const useRestaurantStore = create<RestaurantState>()(
       },
       profile: null,
       menu: [],
+      menuTotalCount: 0,
       customers: [],
       campaigns: [],
       voiceSettings: {
@@ -136,6 +138,7 @@ export const useRestaurantStore = create<RestaurantState>()(
           info: null, 
           profile: null,
           menu: [],
+          menuTotalCount: 0,
           customers: [],
           campaigns: []
         })
@@ -221,13 +224,18 @@ export const useRestaurantStore = create<RestaurantState>()(
         }
       },
 
-      fetchMenu: async () => {
+      fetchMenu: async (page = 1, pageSize = 50) => {
         const tenant_id = get().info?.id || DEFAULT_TENANT_ID
         try {
-          const { data, error } = await supabase
+          const from = (page - 1) * pageSize
+          const to = from + pageSize - 1
+
+          const { data, count, error } = await supabase
             .from('menu_items')
-            .select('*')
+            .select('*', { count: 'exact' })
             .eq('tenant_id', tenant_id)
+            .range(from, to)
+            .order('created_at', { ascending: false })
 
           if (error) {
             console.error("Error fetching menu:", error)
@@ -248,7 +256,7 @@ export const useRestaurantStore = create<RestaurantState>()(
             preparationTime: item.preparation_time || 5
           }))
 
-          set({ menu: mappedMenu })
+          set({ menu: mappedMenu, menuTotalCount: count || 0 })
         } catch (e) {
           console.error("Catch in fetchMenu:", e)
         }

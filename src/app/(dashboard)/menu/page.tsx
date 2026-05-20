@@ -24,8 +24,10 @@ import { toast } from 'react-hot-toast'
 import { MenuItem } from '@/lib/types'
 
 export default function MenuPage() {
-  const { menu, fetchMenu, addMenuItem, updateMenuItem, deleteMenuItem, bulkAddMenuItems } = useRestaurantStore()
+  const { menu, menuTotalCount, fetchMenu, addMenuItem, updateMenuItem, deleteMenuItem, bulkAddMenuItems } = useRestaurantStore()
   const [activeCategory, setActiveCategory] = useState('All')
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = 50
   const [searchQuery, setSearchQuery] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -44,9 +46,11 @@ export default function MenuPage() {
   const [allergens, setAllergens] = useState('')
 
   useEffect(() => {
-    fetchMenu()
-  }, [fetchMenu])
+    fetchMenu(currentPage, pageSize)
+  }, [fetchMenu, currentPage])
 
+  // Because of server-side pagination, categories are limited to the current page unless fetched completely. 
+  // For a fully robust category filter, you would move filtering to the server, but for now we map what we have.
   const categories = ['All', ...Array.from(new Set(menu.map(item => item.category)))]
 
   const filteredItems = menu.filter(item => {
@@ -132,7 +136,7 @@ export default function MenuPage() {
     <div className="space-y-8">
       <PageHeader 
         title="Menu Management" 
-        subtitle={`${menu.length} items across ${categories.length - 1} categories.`}
+        subtitle={`Showing ${menu.length} items of ${menuTotalCount} total.`}
         actions={
           <div className="flex gap-3">
             <input 
@@ -256,6 +260,37 @@ export default function MenuPage() {
           </div>
         )}
       </div>
+
+      {menuTotalCount > pageSize && (
+        <div className="flex items-center justify-between pt-4 border-t border-border mt-8">
+          <div className="text-sm text-text-muted">
+            Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, menuTotalCount)} of {menuTotalCount} items
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="border-border bg-surface text-text-primary hover:bg-surface2"
+            >
+              Previous
+            </Button>
+            <div className="text-sm font-semibold text-text-primary px-2">
+              Page {currentPage} of {Math.ceil(menuTotalCount / pageSize)}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.min(Math.ceil(menuTotalCount / pageSize), p + 1))}
+              disabled={currentPage === Math.ceil(menuTotalCount / pageSize)}
+              className="border-border bg-surface text-text-primary hover:bg-surface2"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={isAddEditOpen} onOpenChange={setIsAddEditOpen}>
         <DialogContent className="bg-surface border-border max-w-md text-text-primary">
