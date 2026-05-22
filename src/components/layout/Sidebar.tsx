@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
 import { supabase } from '@/lib/supabaseClient'
+import { useDateFilterStore } from '@/lib/stores/dateFilterStore'
 
 const navItems = [
   { label: 'Overview', icon: LayoutDashboard, href: '/overview' },
@@ -44,6 +45,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const router = useRouter()
   const { info, profile, logout } = useRestaurantStore()
 
+  const { dateFilter, customStartDate, customEndDate } = useDateFilterStore()
   const [liveOrdersCount, setLiveOrdersCount] = useState<number>(0)
   const [monthOrdersCount, setMonthOrdersCount] = useState<number>(0)
 
@@ -54,11 +56,21 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       try {
         // 1. Fetch live orders count (excluding CANCELLED and DELIVERED statuses)
         // Note: OUT_FOR_DELIVERY orders are stored as READY status in the database
-        const { count: liveCount, error: liveError } = await supabase
+        let liveQuery = supabase
           .from('orders')
           .select('id', { count: 'exact', head: true })
           .eq('tenant_id', tenantId)
           .in('status', ['PENDING', 'PAID', 'PREPARING', 'READY'])
+
+        const { startDate, endDate } = useDateFilterStore.getState().getDateRange()
+        if (startDate) {
+          liveQuery = liveQuery.gte('order_place_at', startDate.toISOString())
+        }
+        if (endDate) {
+          liveQuery = liveQuery.lt('order_place_at', endDate.toISOString())
+        }
+
+        const { count: liveCount, error: liveError } = await liveQuery
 
         if (!liveError && liveCount !== null) {
           setLiveOrdersCount(liveCount)
@@ -100,7 +112,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [info?.id])
+  }, [info?.id, dateFilter, customStartDate, customEndDate])
 
   const initials = profile?.name 
     ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) 
