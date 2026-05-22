@@ -116,7 +116,7 @@ export default function CallLogsPage() {
           <p className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] mb-1">Total Cost (USD)</p>
           <div className="flex items-center justify-between">
             <h3 className="text-2xl font-bold text-text-primary">
-              ${callLogs.reduce((acc, call) => acc + call.cost_usd, 0).toFixed(2)}
+              ${callLogs.reduce((acc, call) => acc + (call.cost_usd || 0), 0).toFixed(2)}
             </h3>
             <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500">
               <CheckCircle2 className="w-5 h-5" />
@@ -222,7 +222,7 @@ export default function CallLogsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-xs font-mono text-text-primary">
-                    ${log.cost_usd.toFixed(2)}
+                    ${(log.cost_usd || 0).toFixed(2)}
                   </TableCell>
                   <TableCell>
                     <p className="text-xs text-text-muted line-clamp-1 max-w-[200px] italic">

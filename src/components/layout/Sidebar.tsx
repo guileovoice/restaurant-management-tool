@@ -53,11 +53,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     async function fetchCounts() {
       try {
         // 1. Fetch live orders count (excluding CANCELLED and DELIVERED statuses)
+        // Note: OUT_FOR_DELIVERY orders are stored as READY status in the database
         const { count: liveCount, error: liveError } = await supabase
           .from('orders')
           .select('id', { count: 'exact', head: true })
           .eq('tenant_id', tenantId)
-          .in('status', ['PENDING', 'PAID', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY'])
+          .in('status', ['PENDING', 'PAID', 'PREPARING', 'READY'])
 
         if (!liveError && liveCount !== null) {
           setLiveOrdersCount(liveCount)

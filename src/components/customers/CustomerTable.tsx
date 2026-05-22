@@ -98,7 +98,7 @@ export function CustomerTable({ data }: CustomerTableProps) {
     {
       accessorKey: 'totalSpent',
       header: 'Total Spent',
-      cell: ({ row }) => <span className="font-bold text-text-primary">${row.original.totalSpent.toFixed(2)}</span>
+      cell: ({ row }) => <span className="font-bold text-text-primary">${(row.original.totalSpent || 0).toFixed(2)}</span>
     },
     {
       accessorKey: 'consents',

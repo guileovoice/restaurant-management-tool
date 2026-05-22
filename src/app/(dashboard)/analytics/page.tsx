@@ -265,7 +265,7 @@ export default function AIAnalyticsPage() {
               <TrendingUp className="w-4 h-4 text-emerald-500" />
               <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Predicted Revenue</span>
             </div>
-            <h3 className="text-2xl font-black text-emerald-500">${predictedTomorrowRevenue.toFixed(2)}</h3>
+            <h3 className="text-2xl font-black text-emerald-500">${(predictedTomorrowRevenue || 0).toFixed(2)}</h3>
             <p className="text-[10px] text-text-muted mt-1 leading-tight">Forecasted order ticket yield based on customer menu preferences.</p>
           </div>
           <Badge className="bg-emerald-500/10 text-emerald-500 border-none self-start text-[9px] font-black uppercase tracking-widest mt-4">
@@ -343,7 +343,7 @@ export default function AIAnalyticsPage() {
                       <div>
                         <h4 className="font-bold text-text-primary text-sm">{item.name}</h4>
                         <p className="text-xs text-text-muted mt-0.5">
-                          Unit Price: ${item.price.toFixed(2)} · Total Sold: <span className="font-bold text-text-primary">{item.count} items</span>
+                          Unit Price: ${(item.price || 0).toFixed(2)} · Total Sold: <span className="font-bold text-text-primary">{item.count} items</span>
                         </p>
                       </div>
                     </div>
@@ -351,7 +351,7 @@ export default function AIAnalyticsPage() {
                     <div className="flex items-center gap-8">
                       <div className="text-right">
                         <p className="text-xs text-text-muted uppercase tracking-widest font-bold text-[9px]">Revenue Yield</p>
-                        <p className="font-bold text-text-primary text-sm">${item.revenue.toFixed(2)}</p>
+                        <p className="font-bold text-text-primary text-sm">${(item.revenue || 0).toFixed(2)}</p>
                       </div>
 
                       <div className="text-right w-16">
