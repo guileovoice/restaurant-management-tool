@@ -153,7 +153,7 @@ export function GlobalDateFilter() {
               <Button
                 key={preset.value}
                 variant="ghost"
-                onClick={() => handlePresetClick(preset)}
+                onClick={() => handlePresetClick(preset.value)}
                 className={cn(
                   "justify-start font-normal hover:bg-surface2",
                   localPreset === preset.value && "bg-surface2 text-primary font-medium"
