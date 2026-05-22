@@ -4,7 +4,7 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { Topbar } from '@/components/layout/Topbar'
 import { usePathname, useRouter } from 'next/navigation'
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function DashboardLayout({
   children,
@@ -15,6 +15,7 @@ export default function DashboardLayout({
   const router = useRouter()
   const { isOnboarded, isAuthenticated, fetchTenantInfo, initializeSession } = useRestaurantStore()
   const isKitchen = pathname === '/kitchen'
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     const init = async () => {
@@ -37,6 +38,11 @@ export default function DashboardLayout({
     }
   }, [isAuthenticated, isOnboarded, pathname, router])
 
+  // Close sidebar on route change
+  useEffect(() => {
+    setSidebarOpen(false)
+  }, [pathname])
+
   // Prevent flash of content for protected routes
   if (!isAuthenticated && pathname !== '/login' && pathname !== '/signup') {
     return null
@@ -56,9 +62,15 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar />
-      <div className="pl-[240px]">
-        <Topbar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/60 md:hidden backdrop-blur-sm transition-opacity duration-300" 
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <div className="md:pl-[240px] pl-0 transition-all duration-300 ease-in-out">
+        <Topbar onMenuClick={() => setSidebarOpen(true)} />
         <main className="p-6 overflow-x-hidden">
           {children}
         </main>

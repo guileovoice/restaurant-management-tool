@@ -153,7 +153,7 @@ export default function MenuPage() {
         title="Menu Management" 
         subtitle={`Showing ${menu.length} items of ${menuTotalCount} total.`}
         actions={
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <input 
               type="file" 
               accept=".csv" 

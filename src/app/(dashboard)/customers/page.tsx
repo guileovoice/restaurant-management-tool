@@ -108,7 +108,7 @@ export default function CustomersPage() {
         title="Customer Intelligence" 
         subtitle="Manage and analyze your customer base, preferences, and predictive traits."
         actions={
-          <div className="flex gap-3 items-center">
+          <div className="flex flex-wrap gap-3 items-center">
             <GlobalDateFilter />
             <Button 
               suppressHydrationWarning

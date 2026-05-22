@@ -102,10 +102,10 @@ function SettingsContent() {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="flex flex-col lg:flex-row gap-8">
-        <TabsList className="bg-surface border border-border flex flex-col items-stretch h-auto p-2 lg:w-[240px] shrink-0">
+        <TabsList className="bg-surface border border-border flex flex-row lg:flex-col items-center lg:items-stretch h-auto p-2 lg:w-[240px] shrink-0 w-full lg:w-auto overflow-x-auto lg:overflow-x-visible scrollbar-none gap-1 lg:gap-0">
           {[
             { id: 'business', label: 'Business Info', icon: Building2 },
-            { id: 'voice', label: 'Voice Agent', icon: Mic2 },
+            { id: 'voice', label: 'Voice Persona', icon: Mic2 },
             { id: 'notifications', label: 'Notifications', icon: Bell },
             { id: 'integrations', label: 'Integrations', icon: LinkIcon },
             { id: 'team', label: 'Team Members', icon: Users },
@@ -116,7 +116,7 @@ function SettingsContent() {
               key={tab.id} 
               value={tab.id}
               className={cn(
-                "justify-start gap-3 px-4 py-3 h-auto data-[state=active]:bg-primary/10 data-[state=active]:text-primary text-text-muted hover:text-text-primary transition-all",
+                "justify-start gap-3 px-4 py-3 h-auto data-[state=active]:bg-primary/10 data-[state=active]:text-primary text-text-muted hover:text-text-primary transition-all whitespace-nowrap",
                 tab.color
               )}
             >

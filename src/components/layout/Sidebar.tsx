@@ -34,7 +34,12 @@ const navItems = [
   { label: 'Settings', icon: Settings, href: '/settings' },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean
+  onClose?: () => void
+}
+
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { info, profile, logout } = useRestaurantStore()
@@ -108,7 +113,10 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="w-[240px] bg-[#13131A] border-r border-border fixed left-0 top-0 h-full flex flex-col z-50">
+    <aside className={cn(
+      "w-[240px] bg-[#13131A] border-r border-border fixed left-0 top-0 h-full flex flex-col z-50 transition-transform duration-300 ease-in-out md:translate-x-0",
+      isOpen ? "translate-x-0" : "-translate-x-full"
+    )}>
       <div className="p-6">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl font-bold text-text-primary tracking-tight">

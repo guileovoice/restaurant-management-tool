@@ -29,10 +29,27 @@ const PRESETS: { label: string; value: DateFilterType }[] = [
 export function GlobalDateFilter() {
   const { dateFilter, setDateFilter, getDateRange } = useDateFilterStore()
   const [open, setOpen] = React.useState(false)
+  const [numberOfMonths, setNumberOfMonths] = React.useState(2)
   
   // Local state for the popover
   const [localPreset, setLocalPreset] = React.useState<DateFilterType>(dateFilter)
   const [localDate, setLocalDate] = React.useState<DateRange | undefined>(undefined)
+
+  // Listen to viewport resizing for responsive calendar display
+  React.useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        if (window.innerWidth < 640) {
+          setNumberOfMonths(1)
+        } else {
+          setNumberOfMonths(2)
+        }
+      }
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Initialize local state when popover opens
   React.useEffect(() => {
@@ -172,7 +189,7 @@ export function GlobalDateFilter() {
               defaultMonth={localDate?.from}
               selected={localDate}
               onSelect={handleCalendarSelect}
-              numberOfMonths={2}
+              numberOfMonths={numberOfMonths}
               className="border-none"
             />
           </div>

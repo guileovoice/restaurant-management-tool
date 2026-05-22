@@ -47,19 +47,20 @@ export default function KitchenPage() {
   return (
     <div className="h-screen flex flex-col bg-[#08080C] text-white p-6 overflow-hidden select-none animate-in fade-in duration-500">
       {/* Kitchen HUD Header */}
-      <div className="flex items-center justify-between mb-6 shrink-0 bg-surface/35 border border-border/40 p-4 rounded-2xl backdrop-blur-md">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row items-center justify-between mb-6 shrink-0 bg-surface/35 border border-border/40 p-4 rounded-2xl backdrop-blur-md gap-4">
+        <div className="flex items-center justify-between md:justify-start gap-4 w-full md:w-auto">
           <Link href="/overview">
-            <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-white/5 gap-2 text-xs font-bold uppercase tracking-wider h-8">
+            <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-white/5 gap-2 text-xs font-bold uppercase tracking-wider h-8 px-2 sm:px-4">
               <ChevronLeft className="w-4 h-4" />
-              Back Dashboard
+              <span className="hidden sm:inline">Back Dashboard</span>
+              <span className="sm:hidden">Back</span>
             </Button>
           </Link>
-          <div className="h-6 w-px bg-zinc-800" />
+          <div className="h-6 w-px bg-zinc-800 hidden sm:block" />
           <div>
-            <h1 className="text-xl font-black uppercase tracking-widest text-text-primary flex items-center gap-2">
+            <h1 className="text-lg sm:text-xl font-black uppercase tracking-widest text-text-primary flex items-center gap-2">
               Guileo<span className="text-primary font-bold">KITCHEN</span>
-              <span className="text-[10px] bg-red-600/20 text-red-500 px-2 py-0.5 rounded font-black border border-red-500/30 animate-pulse uppercase">
+              <span className="text-[9px] bg-red-600/20 text-red-500 px-1.5 py-0.5 rounded font-black border border-red-500/30 animate-pulse uppercase shrink-0">
                 Live HUD
               </span>
             </h1>
@@ -69,8 +70,8 @@ export default function KitchenPage() {
           </div>
         </div>
 
-        <div className="text-center">
-          <div className="text-2xl font-black font-mono tracking-tighter text-text-primary">
+        <div className="text-center w-full md:w-auto py-1 md:py-0 border-y border-zinc-800/40 md:border-none">
+          <div className="text-xl sm:text-2xl font-black font-mono tracking-tighter text-text-primary">
             {mounted ? format(time, 'HH:mm:ss') : '--:--:--'}
           </div>
           <div className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
@@ -78,7 +79,7 @@ export default function KitchenPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center md:justify-end gap-2 w-full md:w-auto">
           <Button 
             variant="outline" 
             size="icon" 

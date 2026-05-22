@@ -214,7 +214,7 @@ export default function CustomerDetailPage() {
       {/* Header Info Card */}
       <Card className="p-6 bg-surface border-border">
         <div className="flex flex-col lg:flex-row gap-8 lg:items-center">
-          <div className="flex items-center gap-6 pr-8 lg:border-r border-border">
+          <div className="flex items-center gap-6 lg:pr-8 lg:border-r lg:border-border">
             <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center text-primary text-3xl font-black">
               {customer.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
             </div>

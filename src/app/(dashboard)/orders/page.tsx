@@ -48,7 +48,7 @@ export default function OrdersPage() {
         title="Live Orders" 
         subtitle="Manage and track incoming orders in real-time."
         actions={
-          <div className="flex gap-3 items-center">
+          <div className="flex flex-wrap gap-3 items-center">
             <GlobalDateFilter />
             <div className="flex items-center gap-2 px-3 py-1 bg-surface2 border border-border rounded-lg mr-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />

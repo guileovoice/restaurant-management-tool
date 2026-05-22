@@ -81,7 +81,7 @@ export default function CampaignsPage() {
         title="Marketing Campaigns" 
         subtitle="Create and manage multi-channel AI-driven marketing campaigns."
         actions={
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <GlobalDateFilter />
             <Button className="bg-primary hover:bg-primary-dark text-white gap-2" onClick={() => setIsCreateOpen(true)}>
               <Plus className="w-4 h-4" />

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Bell, Calendar, ChevronDown, User, Command } from 'lucide-react'
+import { Search, Bell, Calendar, ChevronDown, User, Command, Menu } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { 
@@ -17,7 +17,11 @@ import { useRouter } from 'next/navigation'
 
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
 
-export function Topbar() {
+interface TopbarProps {
+  onMenuClick?: () => void
+}
+
+export function Topbar({ onMenuClick }: TopbarProps) {
   const [time, setTime] = useState(new Date())
   const [mounted, setMounted] = useState(false)
   const [notificationCount, setNotificationCount] = useState(3)
@@ -37,6 +41,14 @@ export function Topbar() {
   return (
     <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur border-b border-border h-16 flex items-center justify-between px-6">
       <div className="flex items-center gap-4 flex-1">
+        {onMenuClick && (
+          <button 
+            onClick={onMenuClick}
+            className="p-2 -ml-2 text-text-muted hover:text-text-primary md:hidden block focus:outline-none transition-colors"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
         <div className="relative max-w-md w-full group">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
           <Input 
@@ -44,7 +56,7 @@ export function Topbar() {
             placeholder="Search anything... (Cmd + K)" 
             className="pl-10 bg-surface2 border-border focus:ring-1 focus:ring-primary h-9 w-full"
           />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-0.5 px-1.5 py-0.5 bg-surface rounded border border-border text-[10px] text-text-muted">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 bg-surface rounded border border-border text-[10px] text-text-muted">
             <Command className="w-2 h-2" /> K
           </div>
         </div>
@@ -123,7 +135,7 @@ export function Topbar() {
 
         <DropdownMenu>
           <DropdownMenuTrigger suppressHydrationWarning className="flex items-center gap-2 p-1 pl-2 pr-1 rounded-full border border-border hover:bg-surface2 transition-all outline-none">
-            <span className="text-xs font-medium text-text-primary px-1">{info?.name || 'Loading...'}</span>
+            <span className="text-xs font-medium text-text-primary px-1 hidden sm:inline">{info?.name || 'Loading...'}</span>
             <div className="w-7 h-7 rounded-full bg-surface2 flex items-center justify-center">
               <ChevronDown className="w-4 h-4 text-text-muted" />
             </div>

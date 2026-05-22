@@ -86,6 +86,9 @@ export default function CallLogsPage() {
      (log.customer_phone || '').includes(searchQuery))
   )
 
+  const totalDuration = callLogs.reduce((acc, c) => acc + c.duration_seconds, 0)
+  const avgDuration = callLogs.length > 0 ? totalDuration / callLogs.length : 0
+
   return (
     <div className="space-y-8 pb-12">
       <PageHeader 
@@ -135,7 +138,7 @@ export default function CallLogsPage() {
           <p className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] mb-1">Avg Duration</p>
           <div className="flex items-center justify-between">
             <h3 className="text-2xl font-bold text-text-primary">
-              {Math.floor(callLogs.reduce((acc, c) => acc + c.duration_seconds, 0) / callLogs.length / 60)}m {Math.floor(callLogs.reduce((acc, c) => acc + c.duration_seconds, 0) / callLogs.length % 60)}s
+              {Math.floor(avgDuration / 60)}m {Math.floor(avgDuration % 60)}s
             </h3>
             <div className="p-2 bg-amber-500/10 rounded-lg text-amber-500">
               <Clock className="w-5 h-5" />
@@ -172,68 +175,70 @@ export default function CallLogsPage() {
           </Button>
         </div>
 
-        <Table>
-          <TableHeader className="bg-surface2/50">
-            <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest text-text-muted h-12">Customer</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest text-text-muted h-12">Time</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest text-text-muted h-12">Duration</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest text-text-muted h-12">Status</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest text-text-muted h-12">Cost</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest text-text-muted h-12">Summary</TableHead>
-              <TableHead className="h-12 text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredLogs.map((log) => (
-              <TableRow 
-                key={log.id} 
-                className="border-border hover:bg-surface2/50 transition-colors cursor-pointer group"
-                onClick={() => setSelectedCall(log)}
-              >
-                <TableCell className="py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
-                      {log.customer_name?.[0] || '?'}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-text-primary">{log.customer_name || 'Unknown'}</p>
-                      <p className="text-[10px] text-text-muted">{log.customer_phone}</p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="text-xs text-text-muted">
-                  {format(new Date(log.started_at), 'MMM d, h:mm a')}
-                </TableCell>
-                <TableCell className="text-xs text-text-primary font-mono">
-                  {Math.floor(log.duration_seconds / 60)}m {Math.floor(log.duration_seconds % 60)}s
-                </TableCell>
-                <TableCell>
-                  <Badge className={cn(
-                    "text-[10px] font-bold uppercase border-none",
-                    log.status === 'completed' ? "bg-emerald-500/10 text-emerald-500" : 
-                    log.status === 'missed' ? "bg-danger/10 text-danger" : "bg-amber-500/10 text-amber-500"
-                  )}>
-                    {log.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-xs font-mono text-text-primary">
-                  ${log.cost_usd.toFixed(2)}
-                </TableCell>
-                <TableCell>
-                  <p className="text-xs text-text-muted line-clamp-1 max-w-[200px] italic">
-                    {log.summary || 'No summary available'}
-                  </p>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" className="text-primary hover:bg-primary/10 text-[10px] font-bold uppercase tracking-widest">
-                    Details <ChevronRight className="w-3 h-3 ml-1" />
-                  </Button>
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-surface2/50">
+              <TableRow className="border-border hover:bg-transparent">
+                <TableHead className="text-[10px] font-bold uppercase tracking-widest text-text-muted h-12">Customer</TableHead>
+                <TableHead className="text-[10px] font-bold uppercase tracking-widest text-text-muted h-12">Time</TableHead>
+                <TableHead className="text-[10px] font-bold uppercase tracking-widest text-text-muted h-12">Duration</TableHead>
+                <TableHead className="text-[10px] font-bold uppercase tracking-widest text-text-muted h-12">Status</TableHead>
+                <TableHead className="text-[10px] font-bold uppercase tracking-widest text-text-muted h-12">Cost</TableHead>
+                <TableHead className="text-[10px] font-bold uppercase tracking-widest text-text-muted h-12">Summary</TableHead>
+                <TableHead className="h-12 text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {filteredLogs.map((log) => (
+                <TableRow 
+                  key={log.id} 
+                  className="border-border hover:bg-surface2/50 transition-colors cursor-pointer group"
+                  onClick={() => setSelectedCall(log)}
+                >
+                  <TableCell className="py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                        {log.customer_name?.[0] || '?'}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-text-primary">{log.customer_name || 'Unknown'}</p>
+                        <p className="text-[10px] text-text-muted">{log.customer_phone}</p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-xs text-text-muted">
+                    {format(new Date(log.started_at), 'MMM d, h:mm a')}
+                  </TableCell>
+                  <TableCell className="text-xs text-text-primary font-mono">
+                    {Math.floor(log.duration_seconds / 60)}m {Math.floor(log.duration_seconds % 60)}s
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={cn(
+                      "text-[10px] font-bold uppercase border-none",
+                      log.status === 'completed' ? "bg-emerald-500/10 text-emerald-500" : 
+                      log.status === 'missed' ? "bg-danger/10 text-danger" : "bg-amber-500/10 text-amber-500"
+                    )}>
+                      {log.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-xs font-mono text-text-primary">
+                    ${log.cost_usd.toFixed(2)}
+                  </TableCell>
+                  <TableCell>
+                    <p className="text-xs text-text-muted line-clamp-1 max-w-[200px] italic">
+                      {log.summary || 'No summary available'}
+                    </p>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm" className="text-primary hover:bg-primary/10 text-[10px] font-bold uppercase tracking-widest">
+                      Details <ChevronRight className="w-3 h-3 ml-1" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* Call Detail Modal */}
