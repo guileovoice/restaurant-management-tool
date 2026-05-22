@@ -23,6 +23,14 @@ import { Switch } from '@/components/ui/switch'
 import { toast } from 'react-hot-toast'
 import { MenuItem } from '@/lib/types'
 
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select'
+
 export default function MenuPage() {
   const { menu, menuTotalCount, fetchMenu, addMenuItem, updateMenuItem, deleteMenuItem, bulkAddMenuItems } = useRestaurantStore()
   const [activeCategory, setActiveCategory] = useState('All')
@@ -192,19 +200,24 @@ export default function MenuPage() {
       />
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-surface p-4 rounded-xl border border-border">
-        <Tabs defaultValue="All" className="w-full lg:w-auto" onValueChange={setActiveCategory}>
-          <TabsList className="bg-surface2 p-1 border border-border h-11 overflow-x-auto justify-start">
-            {categories.map(category => (
-              <TabsTrigger 
-                key={category} 
-                value={category}
-                className="data-[state=active]:bg-primary data-[state=active]:text-white px-4 text-xs font-bold uppercase tracking-widest transition-all"
-              >
-                {category}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <Select value={activeCategory} onValueChange={setActiveCategory}>
+            <SelectTrigger className="w-full md:w-[200px] bg-surface2 border-border h-10 text-xs font-bold uppercase tracking-widest text-text-primary">
+              <SelectValue placeholder="Category: All" />
+            </SelectTrigger>
+            <SelectContent className="bg-surface border-border">
+              {categories.map(category => (
+                <SelectItem 
+                  key={category} 
+                  value={category}
+                  className="text-xs font-bold uppercase tracking-widest text-text-primary focus:bg-primary focus:text-white"
+                >
+                  {category === 'All' ? 'All Categories' : category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { MenuItem, Customer, Campaign, CallLog } from '../types'
 import { supabase } from '../supabaseClient'
+import { useDateFilterStore } from './dateFilterStore'
 
 interface RestaurantInfo {
   id?: string
@@ -265,10 +266,20 @@ export const useRestaurantStore = create<RestaurantState>()(
       fetchCustomers: async () => {
         const tenant_id = get().info?.id || DEFAULT_TENANT_ID
         try {
-          const { data: customersData, error: customersErr } = await supabase
+          let custQuery = supabase
             .from('customers')
             .select('*')
             .eq('tenant_id', tenant_id)
+
+          const { startDate, endDate } = useDateFilterStore.getState().getDateRange()
+
+          if (startDate && endDate) {
+            const startStr = `"${startDate.toISOString()}"`
+            const endStr = `"${endDate.toISOString()}"`
+            custQuery = custQuery.or(`and(created_at.gte.${startStr},created_at.lt.${endStr}),and(last_order_at.gte.${startStr},last_order_at.lt.${endStr})`)
+          }
+
+          const { data: customersData, error: customersErr } = await custQuery
 
           if (customersErr) {
             console.error("Error fetching customers:", customersErr)
@@ -276,10 +287,19 @@ export const useRestaurantStore = create<RestaurantState>()(
           }
 
           // Fetch all orders to compute real-time sums for LTV
-          const { data: ordersData } = await supabase
+          let ordQuery = supabase
             .from('orders')
             .select('id, customer_id, customer_phone, total, status')
             .eq('tenant_id', tenant_id)
+
+          if (startDate) {
+            ordQuery = ordQuery.gte('order_place_at', startDate.toISOString())
+          }
+          if (endDate) {
+            ordQuery = ordQuery.lt('order_place_at', endDate.toISOString())
+          }
+
+          const { data: ordersData } = await ordQuery
 
           const mappedCustomers: Customer[] = (customersData || []).map(c => {
             const normalizedCustPhone = c.phone ? c.phone.trim() : ''
@@ -338,10 +358,21 @@ export const useRestaurantStore = create<RestaurantState>()(
       fetchCampaigns: async () => {
         const tenant_id = get().info?.id || DEFAULT_TENANT_ID
         try {
-          const { data, error } = await supabase
+          let campQuery = supabase
             .from('campaigns')
             .select('*')
             .eq('tenant_id', tenant_id)
+
+          const { startDate, endDate } = useDateFilterStore.getState().getDateRange()
+          
+          if (startDate) {
+            campQuery = campQuery.gte('created_at', startDate.toISOString())
+          }
+          if (endDate) {
+            campQuery = campQuery.lt('created_at', endDate.toISOString())
+          }
+
+          const { data, error } = await campQuery
 
           if (error) {
             console.error("Error fetching campaigns:", error)

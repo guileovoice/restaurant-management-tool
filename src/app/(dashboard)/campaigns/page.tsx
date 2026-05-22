@@ -9,12 +9,15 @@ import { Card } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { GlobalDateFilter } from '@/components/shared/GlobalDateFilter'
+import { useDateFilterStore } from '@/lib/stores/dateFilterStore'
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
 import { supabase } from '@/lib/supabaseClient'
 import { toast } from 'react-hot-toast'
 
 export default function CampaignsPage() {
   const { campaigns, fetchCampaigns } = useRestaurantStore()
+  const { dateFilter, customStartDate, customEndDate } = useDateFilterStore()
   
   // Modal state variables
   const [isCreateOpen, setIsCreateOpen] = useState(false)
@@ -26,7 +29,7 @@ export default function CampaignsPage() {
 
   useEffect(() => {
     fetchCampaigns()
-  }, [fetchCampaigns])
+  }, [fetchCampaigns, dateFilter, customStartDate, customEndDate])
 
   const handleCreateCampaign = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,10 +81,13 @@ export default function CampaignsPage() {
         title="Marketing Campaigns" 
         subtitle="Create and manage multi-channel AI-driven marketing campaigns."
         actions={
-          <Button className="bg-primary hover:bg-primary-dark text-white gap-2" onClick={() => setIsCreateOpen(true)}>
-            <Plus className="w-4 h-4" />
-            Create Campaign
-          </Button>
+          <div className="flex items-center gap-3">
+            <GlobalDateFilter />
+            <Button className="bg-primary hover:bg-primary-dark text-white gap-2" onClick={() => setIsCreateOpen(true)}>
+              <Plus className="w-4 h-4" />
+              Create Campaign
+            </Button>
+          </div>
         }
       />
 

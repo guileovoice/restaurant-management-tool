@@ -4,7 +4,7 @@ import {
   DollarSign, 
   ShoppingBag, 
   TrendingUp, 
-  PhoneMissed, 
+  PhoneCall, 
   UserPlus, 
   RefreshCw,
   ChefHat,
@@ -27,65 +27,51 @@ import { useOrdersStore } from '@/lib/stores/ordersStore'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { toast } from 'react-hot-toast'
+import { GlobalDateFilter } from '@/components/shared/GlobalDateFilter'
+import { useDateFilterStore } from '@/lib/stores/dateFilterStore'
 
 export default function OverviewPage() {
   const { info, customers, fetchCustomers } = useRestaurantStore()
   const { orders, fetchOrders } = useOrdersStore()
-  const [missedCallsCount, setMissedCallsCount] = useState(0)
-  const [dateFilter, setDateFilter] = useState<'today' | 'yesterday' | '7d' | '30d' | 'all'>('all')
+  const [totalCallsCount, setTotalCallsCount] = useState(0)
+  const { dateFilter, customStartDate, customEndDate, getDateRange } = useDateFilterStore()
 
   useEffect(() => {
     fetchCustomers()
     fetchOrders()
     
-    // Fetch count of missed calls from Supabase
-    async function getMissedCalls() {
+    // Fetch count of total calls from Supabase based on date
+    async function getTotalCalls() {
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('vapi_call_logs')
-          .select('id')
-          .eq('status', 'missed')
-        if (data) {
-          setMissedCallsCount(data.length)
+          .select('id', { count: 'exact' })
+        
+        const { startDate, endDate } = getDateRange()
+        
+        if (startDate) {
+          query = query.gte('started_at', startDate.toISOString())
+        }
+        if (endDate) {
+          query = query.lt('started_at', endDate.toISOString())
+        }
+
+        const { data, count, error } = await query
+
+        if (error) {
+          console.error("Error fetching calls:", error)
+        } else {
+          setTotalCallsCount(count || (data ? data.length : 0))
         }
       } catch (e) {
         console.error(e)
       }
     }
-    getMissedCalls()
-  }, [fetchCustomers, fetchOrders])
+    getTotalCalls()
+  }, [fetchCustomers, fetchOrders, dateFilter, customStartDate, customEndDate])
 
-  // Filter orders dynamically based on selected date filter
-  const filteredOrders = orders.filter(o => {
-    if (!o.createdAt) return true
-    const orderDate = new Date(o.createdAt)
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
-
-    const yesterdayStart = new Date(todayStart)
-    yesterdayStart.setDate(yesterdayStart.getDate() - 1)
-    const yesterdayEnd = new Date(todayStart)
-
-    const sevenDaysAgo = new Date(todayStart)
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-
-    const thirtyDaysAgo = new Date(todayStart)
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
-    switch (dateFilter) {
-      case 'today':
-        return orderDate >= todayStart
-      case 'yesterday':
-        return orderDate >= yesterdayStart && orderDate < yesterdayEnd
-      case '7d':
-        return orderDate >= sevenDaysAgo
-      case '30d':
-        return orderDate >= thirtyDaysAgo
-      case 'all':
-      default:
-        return true
-    }
-  })
+  // Orders are already filtered by the ordersStore based on date filter, so no local filter needed
+  const filteredOrders = orders
 
   // Dynamic calculations based on filtered subset
   const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.total, 0)
@@ -161,30 +147,7 @@ export default function OverviewPage() {
         actions={
           <div className="flex flex-wrap gap-3 items-center">
             {/* Elegant Button Group Date Selector */}
-            <div className="flex bg-surface2 border border-border p-1 rounded-xl items-center gap-1 shadow-inner mr-2">
-              {[
-                { label: 'Today', value: 'today' },
-                { label: 'Yesterday', value: 'yesterday' },
-                { label: '7 Days', value: '7d' },
-                { label: '30 Days', value: '30d' },
-                { label: 'All Time', value: 'all' }
-              ].map(opt => (
-                <Button 
-                  suppressHydrationWarning
-                  key={opt.value}
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setDateFilter(opt.value as any)}
-                  className={`text-[10px] uppercase font-black tracking-wider px-3.5 py-1.5 h-8 rounded-lg transition-all ${
-                    dateFilter === opt.value 
-                      ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-[1.03]' 
-                      : 'text-text-muted hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  {opt.label}
-                </Button>
-              ))}
-            </div>
+            <GlobalDateFilter />
 
             <Button 
               suppressHydrationWarning
@@ -227,12 +190,12 @@ export default function OverviewPage() {
           color="amber" 
         />
         <StatCard 
-          icon={PhoneMissed} 
-          label="Missed Calls" 
-          value={missedCallsCount.toString()} 
-          change={40} 
-          trend="down" 
-          color="red" 
+          icon={PhoneCall} 
+          label="Total Calls" 
+          value={totalCallsCount.toString()} 
+          change={15} 
+          trend="up" 
+          color="blue" 
         />
         <StatCard 
           icon={UserPlus} 

@@ -34,36 +34,43 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select'
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetDescription, 
-  SheetHeader, 
-  SheetTitle 
-} from '@/components/ui/sheet'
+import { CallAnalysisDialog } from '@/components/shared/CallAnalysisDialog'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
-import { CallLog } from '@/lib/types'
 import { supabase } from '@/lib/supabaseClient'
 import { useEffect } from 'react'
+import { GlobalDateFilter } from '@/components/shared/GlobalDateFilter'
+import { useDateFilterStore } from '@/lib/stores/dateFilterStore'
 
 export default function CallLogsPage() {
-  const [callLogs, setCallLogs] = useState<CallLog[]>([])
+  const [callLogs, setCallLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedCall, setSelectedCall] = useState<CallLog | null>(null)
+  const [selectedCall, setSelectedCall] = useState<any | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const { dateFilter, customStartDate, customEndDate, getDateRange } = useDateFilterStore()
 
   useEffect(() => {
     async function fetchCalls() {
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('vapi_call_logs')
           .select('*')
           .order('started_at', { ascending: false })
+
+        const { startDate, endDate } = getDateRange()
+        
+        if (startDate) {
+          query = query.gte('started_at', startDate.toISOString())
+        }
+        if (endDate) {
+          query = query.lt('started_at', endDate.toISOString())
+        }
+
+        const { data, error } = await query
         if (error) {
           console.error("Error fetching call logs:", error)
         } else if (data) {
-          setCallLogs(data as CallLog[])
+          setCallLogs(data)
         }
       } catch (e) {
         console.error(e)
@@ -72,11 +79,11 @@ export default function CallLogsPage() {
       }
     }
     fetchCalls()
-  }, [])
+  }, [dateFilter, customStartDate, customEndDate])
 
   const filteredLogs = callLogs.filter(log => 
-    (log.customer_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-     log.customer_phone.includes(searchQuery))
+    ((log.customer_name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+     (log.customer_phone || '').includes(searchQuery))
   )
 
   return (
@@ -84,6 +91,11 @@ export default function CallLogsPage() {
       <PageHeader 
         title="Call & Message Logs" 
         subtitle="Review AI agent interactions and performance metrics from Vapi."
+        actions={
+          <div className="flex items-center">
+            <GlobalDateFilter />
+          </div>
+        }
       />
 
       {/* Analytics Row */}
@@ -225,88 +237,11 @@ export default function CallLogsPage() {
       </div>
 
       {/* Call Detail Modal */}
-      <Sheet open={!!selectedCall} onOpenChange={(open) => !open && setSelectedCall(null)}>
-        <SheetContent className="bg-surface border-l border-border sm:max-w-xl overflow-y-auto">
-          {selectedCall && (
-            <div className="space-y-8 py-6">
-              <SheetHeader>
-                <div className="flex items-center justify-between mb-2">
-                  <Badge className="bg-primary/10 text-primary border-none text-[10px] font-black uppercase tracking-widest">
-                    {selectedCall.type} · {selectedCall.source}
-                  </Badge>
-                  <span className="text-[10px] font-mono text-text-muted">ID: {selectedCall.id}</span>
-                </div>
-                <SheetTitle className="text-2xl font-black text-text-primary uppercase tracking-tighter">
-                  Call Analysis
-                </SheetTitle>
-                <SheetDescription className="text-text-muted">
-                  {format(new Date(selectedCall.started_at), 'MMMM d, yyyy · h:mm a')}
-                </SheetDescription>
-              </SheetHeader>
-
-              <div className="grid grid-cols-2 gap-4">
-                <Card className="p-4 bg-surface2 border-border">
-                  <p className="text-[10px] text-text-muted uppercase font-bold tracking-widest mb-1">Duration</p>
-                  <p className="text-lg font-black text-text-primary">
-                    {Math.floor(selectedCall.duration_seconds / 60)}m {Math.floor(selectedCall.duration_seconds % 60)}s
-                  </p>
-                </Card>
-                <Card className="p-4 bg-surface2 border-border">
-                  <p className="text-[10px] text-text-muted uppercase font-bold tracking-widest mb-1">Cost</p>
-                  <p className="text-lg font-black text-primary">${selectedCall.cost_usd.toFixed(2)}</p>
-                </Card>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="text-xs font-black text-text-primary uppercase tracking-widest flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-primary" /> AI Summary
-                </h4>
-                <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl italic text-sm text-text-primary leading-relaxed">
-                  "{selectedCall.summary}"
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="text-xs font-black text-text-primary uppercase tracking-widest flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-primary" /> Transcript
-                </h4>
-                <div className="space-y-4">
-                  {Array.isArray(selectedCall.transcript) ? selectedCall.transcript.map((msg: any, i: number) => (
-                    <div key={i} className={cn(
-                      "flex flex-col gap-1 max-w-[80%]",
-                      msg.role === 'assistant' ? "items-start" : "items-end ml-auto"
-                    )}>
-                      <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
-                        {msg.role === 'assistant' ? 'Guileo AI' : 'Customer'}
-                      </span>
-                      <div className={cn(
-                        "p-3 rounded-2xl text-sm",
-                        msg.role === 'assistant' 
-                          ? "bg-surface2 border border-border text-text-primary rounded-tl-none" 
-                          : "bg-primary text-white rounded-tr-none"
-                      )}>
-                        {msg.text}
-                      </div>
-                    </div>
-                  )) : (
-                    <p className="text-xs text-text-muted italic">No transcript available for this call.</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="pt-6 border-t border-border">
-                {selectedCall.recording_url ? (
-                  <Button className="w-full h-12 bg-primary hover:bg-primary-dark text-white font-bold uppercase tracking-widest gap-2">
-                    <PlayCircle className="w-4 h-4" /> Listen to Recording
-                  </Button>
-                ) : (
-                  <p className="text-center text-xs text-text-muted italic">Recording not available</p>
-                )}
-              </div>
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
+      <CallAnalysisDialog 
+        isOpen={!!selectedCall}
+        onClose={() => setSelectedCall(null)}
+        call={selectedCall}
+      />
     </div>
   )
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Filter, RotateCw, Plus, Search } from 'lucide-react'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { GlobalDateFilter } from '@/components/shared/GlobalDateFilter'
 import { KanbanBoard } from '@/components/orders/KanbanBoard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +16,7 @@ import {
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { useOrdersStore } from '@/lib/stores/ordersStore'
+import { useDateFilterStore } from '@/lib/stores/dateFilterStore'
 
 export default function OrdersPage() {
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -22,10 +24,11 @@ export default function OrdersPage() {
   const [activeChannel, setActiveChannel] = useState('all')
   const [activeType, setActiveType] = useState('all')
   const { fetchOrders } = useOrdersStore()
+  const { dateFilter, customStartDate, customEndDate } = useDateFilterStore()
 
   useEffect(() => {
     fetchOrders()
-  }, [fetchOrders])
+  }, [fetchOrders, dateFilter, customStartDate, customEndDate])
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
@@ -45,7 +48,8 @@ export default function OrdersPage() {
         title="Live Orders" 
         subtitle="Manage and track incoming orders in real-time."
         actions={
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
+            <GlobalDateFilter />
             <div className="flex items-center gap-2 px-3 py-1 bg-surface2 border border-border rounded-lg mr-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
               <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Live</span>

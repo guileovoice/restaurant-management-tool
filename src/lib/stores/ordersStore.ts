@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { Order, OrderStatus } from '../types'
 import { supabase } from '../supabaseClient'
 import { useRestaurantStore } from './restaurantStore'
+import { useDateFilterStore } from './dateFilterStore'
 
 interface OrdersState {
   orders: Order[]
@@ -21,10 +22,21 @@ export const useOrdersStore = create<OrdersState>((set) => ({
       console.log("[useOrdersStore] Triggering supabase select with joined order_items...");
       
       // Fetch all orders and join their order_items in a single fast query
-      const { data: dbOrders, error: ordersErr } = await supabase
+      let query = supabase
         .from('orders')
         .select('*')
         .order('order_place_at', { ascending: false })
+
+      const { startDate, endDate } = useDateFilterStore.getState().getDateRange()
+      
+      if (startDate) {
+        query = query.gte('order_place_at', startDate.toISOString())
+      }
+      if (endDate) {
+        query = query.lt('order_place_at', endDate.toISOString())
+      }
+
+      const { data: dbOrders, error: ordersErr } = await query
 
       if (ordersErr) {
         console.error("[useOrdersStore] Error fetching orders joined with items:", ordersErr)

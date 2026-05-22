@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { 
@@ -18,6 +19,7 @@ import {
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
+import { supabase } from '@/lib/supabaseClient'
 
 const navItems = [
   { label: 'Overview', icon: LayoutDashboard, href: '/overview' },
@@ -36,6 +38,63 @@ export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { info, profile, logout } = useRestaurantStore()
+
+  const [liveOrdersCount, setLiveOrdersCount] = useState<number>(0)
+  const [monthOrdersCount, setMonthOrdersCount] = useState<number>(0)
+
+  useEffect(() => {
+    const tenantId = info?.id || '395b50b9-9504-47ce-a8be-3b5c3ff22315'
+    
+    async function fetchCounts() {
+      try {
+        // 1. Fetch live orders count (excluding CANCELLED and DELIVERED statuses)
+        const { count: liveCount, error: liveError } = await supabase
+          .from('orders')
+          .select('id', { count: 'exact', head: true })
+          .eq('tenant_id', tenantId)
+          .in('status', ['PENDING', 'PAID', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY'])
+
+        if (!liveError && liveCount !== null) {
+          setLiveOrdersCount(liveCount)
+        }
+
+        // 2. Fetch monthly orders count
+        const startOfMonth = new Date()
+        startOfMonth.setDate(1)
+        startOfMonth.setHours(0, 0, 0, 0)
+
+        const { count: monthCount, error: monthError } = await supabase
+          .from('orders')
+          .select('id', { count: 'exact', head: true })
+          .eq('tenant_id', tenantId)
+          .gte('order_place_at', startOfMonth.toISOString())
+
+        if (!monthError && monthCount !== null) {
+          setMonthOrdersCount(monthCount)
+        }
+      } catch (err) {
+        console.error("Error fetching sidebar counts:", err)
+      }
+    }
+
+    fetchCounts()
+
+    // Subscribe to changes in the orders table to update counts in real time
+    const channel = supabase
+      .channel('sidebar-orders-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        () => {
+          fetchCounts()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [info?.id])
 
   const initials = profile?.name 
     ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) 
@@ -69,6 +128,7 @@ export function Sidebar() {
       <nav className="flex-1 px-3 space-y-1 mt-4 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href
+          const badgeValue = item.label === 'Live Orders' ? liveOrdersCount : item.badge
           return (
             <Link
               key={item.href}
@@ -89,9 +149,9 @@ export function Sidebar() {
                   SOON
                 </Badge>
               )}
-              {item.badge && (
+              {badgeValue !== undefined && badgeValue > 0 && (
                 <Badge className="bg-primary text-white text-[10px] px-1.5 h-4 min-w-[16px] flex items-center justify-center">
-                  {item.badge}
+                  {badgeValue}
                 </Badge>
               )}
             </Link>
@@ -104,10 +164,13 @@ export function Sidebar() {
           <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-1">Growth Plan</p>
           <div className="flex items-center justify-between text-xs text-text-primary">
             <span>Orders this month</span>
-            <span className="font-semibold">842 / 2000</span>
+            <span className="font-semibold">{monthOrdersCount} / 2000</span>
           </div>
           <div className="w-full bg-surface2 h-1 rounded-full mt-2">
-            <div className="bg-amber-500 h-1 rounded-full w-[42%]" />
+            <div 
+              className="bg-amber-500 h-1 rounded-full transition-all duration-500" 
+              style={{ width: `${Math.min(100, Math.round((monthOrdersCount / 2000) * 100))}%` }}
+            />
           </div>
         </div>
 

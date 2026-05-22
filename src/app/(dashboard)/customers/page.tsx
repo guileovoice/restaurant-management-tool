@@ -3,30 +3,26 @@
 import { useState, useEffect } from 'react'
 import { Search, Download, Filter, Users, UserCheck, UserX, Heart } from 'lucide-react'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { GlobalDateFilter } from '@/components/shared/GlobalDateFilter'
 import { CustomerTable } from '@/components/customers/CustomerTable'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
+import { useDateFilterStore } from '@/lib/stores/dateFilterStore'
 import { toast } from 'react-hot-toast'
 
 export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [segmentFilter, setSegmentFilter] = useState('all')
   const [consentFilter, setConsentFilter] = useState('all')
-  
   const { customers, fetchCustomers } = useRestaurantStore()
+  const { dateFilter, customStartDate, customEndDate } = useDateFilterStore()
 
   useEffect(() => {
     fetchCustomers()
-  }, [fetchCustomers])
+  }, [fetchCustomers, dateFilter, customStartDate, customEndDate])
 
   // Calculate dynamic stats
   const totalCount = customers.length
@@ -112,15 +108,18 @@ export default function CustomersPage() {
         title="Customer Intelligence" 
         subtitle="Manage and analyze your customer base, preferences, and predictive traits."
         actions={
-          <Button 
-            suppressHydrationWarning
-            onClick={handleExportCSV}
-            variant="outline" 
-            className="border-border bg-surface text-text-primary gap-2 text-xs font-bold uppercase tracking-wider h-9"
-          >
-            <Download className="w-4 h-4 text-primary" />
-            Export CSV
-          </Button>
+          <div className="flex gap-3 items-center">
+            <GlobalDateFilter />
+            <Button 
+              suppressHydrationWarning
+              onClick={handleExportCSV}
+              variant="outline" 
+              className="border-border bg-surface text-text-primary gap-2 text-xs font-bold uppercase tracking-wider h-9"
+            >
+              <Download className="w-4 h-4 text-primary" />
+              Export CSV
+            </Button>
+          </div>
         }
       />
 

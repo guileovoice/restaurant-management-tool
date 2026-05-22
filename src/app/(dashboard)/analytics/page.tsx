@@ -20,6 +20,8 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { toast } from 'react-hot-toast'
+import { GlobalDateFilter } from '@/components/shared/GlobalDateFilter'
+import { useDateFilterStore } from '@/lib/stores/dateFilterStore'
 
 interface TopSellerItem {
   name: string
@@ -37,7 +39,7 @@ interface PeakHourForecast {
 }
 
 export default function AIAnalyticsPage() {
-  const [timeRange, setTimeRange] = useState<'7d' | '30d'>('7d')
+  const { dateFilter, customStartDate, customEndDate, getDateRange } = useDateFilterStore()
   const [isLoading, setIsLoading] = useState(true)
   const [bestSellers, setBestSellers] = useState<TopSellerItem[]>([])
   const [totalRevenue, setTotalRevenue] = useState(0)
@@ -75,10 +77,20 @@ export default function AIAnalyticsPage() {
     async function loadRealAnalytics() {
       setIsLoading(true)
       try {
-        // Fetch all orders and items from Supabase
-        const { data: dbOrders, error } = await supabase
+        let query = supabase
           .from('orders')
           .select('*, order_items(*)')
+        
+        const { startDate, endDate } = getDateRange()
+        
+        if (startDate) {
+          query = query.gte('order_place_at', startDate.toISOString())
+        }
+        if (endDate) {
+          query = query.lt('order_place_at', endDate.toISOString())
+        }
+
+        const { data: dbOrders, error } = await query
 
         if (error) {
           console.error("Error fetching analytics database records:", error)
@@ -162,7 +174,7 @@ export default function AIAnalyticsPage() {
     }
 
     loadRealAnalytics()
-  }, [timeRange])
+  }, [dateFilter, customStartDate, customEndDate])
 
   const handleRefitModels = () => {
     const loader = toast.loading('Re-fitting Bayesian regression and time-series ARIMA models on current Supabase orders...')
@@ -179,7 +191,8 @@ export default function AIAnalyticsPage() {
         title="AI Analytics & Predictions" 
         subtitle="Leverage time-series forecasting models and predictive stock controllers to optimize kitchen preparations."
         actions={
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
+            <GlobalDateFilter />
             <Button 
               variant="outline" 
               className="border-border bg-surface hover:bg-surface2 text-text-primary gap-2 text-xs uppercase tracking-widest font-bold h-9"
@@ -219,19 +232,8 @@ export default function AIAnalyticsPage() {
         <div className="flex items-center gap-3">
           <Calendar className="w-4 h-4 text-primary" />
           <span className="text-sm font-semibold text-text-primary">Historical Lookback Window:</span>
-          <div className="flex gap-1 bg-surface2 p-1 rounded-lg border border-border">
-            <button 
-              className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${timeRange === '7d' ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
-              onClick={() => setTimeRange('7d')}
-            >
-              Last 7 Days
-            </button>
-            <button 
-              className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${timeRange === '30d' ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
-              onClick={() => setTimeRange('30d')}
-            >
-              Last 30 Days
-            </button>
+          <div className="flex gap-1 text-xs text-text-muted font-bold ml-2">
+            Using Global Filter: <span className="text-primary uppercase tracking-wider">{dateFilter}</span>
           </div>
         </div>
         <div className="flex items-center gap-2 text-xs font-bold uppercase text-emerald-500">
