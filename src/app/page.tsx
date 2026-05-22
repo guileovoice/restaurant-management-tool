@@ -147,6 +147,18 @@ export default function ProfessionalLandingPage() {
           channel: 'WEB',
           address: orderType === 'DELIVERY' ? address : null,
           payment_status: 'PAID',
+          notes: notes,
+          order_place_at: new Date().toISOString(),
+          order_items: JSON.stringify(cart.map(item => {
+            const dish = getItem(item.id)
+            return {
+              id: dish.id,
+              name: dish.name,
+              quantity: item.quantity,
+              price: dish.price,
+              notes: ''
+            }
+          })),
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
