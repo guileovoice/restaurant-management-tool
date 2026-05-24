@@ -1,0 +1,682 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nypdq-order",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "0a27393f-1494-4cb0-9da5-62f625d37afd",
+      "name": "Webhook — Vapi POST7",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -24848,
+        -1152
+      ],
+      "webhookId": "nypdq-order-webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "6452bb92-ea55-49e4-a8cc-b2e99ccb989d",
+      "name": "Respond 200 to Vapi7",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -24608,
+        -1296
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c23b776f-693d-40c9-af39-b0c7e2555b7b",
+              "leftValue": "={{$json.body.message.type}}",
+              "rightValue": "end-of-call-report",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -24592,
+        -1152
+      ],
+      "id": "0a9e0f02-1a7d-422e-a4d6-8b0c034970c8",
+      "name": "If9"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://rvqcajvsnvafzdmdotcw.supabase.co/rest/v1/customers",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cWNhanZzbnZhZnpkbWRvdGN3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODgyNTIzMiwiZXhwIjoyMDk0NDAxMjMyfQ.xFDCgKg80lxdGtF6Hb_9J5fAv_jqel_l380Dln1b71A"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cWNhanZzbnZhZnpkbWRvdGN3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODgyNTIzMiwiZXhwIjoyMDk0NDAxMjMyfQ.xFDCgKg80lxdGtF6Hb_9J5fAv_jqel_l380Dln1b71A"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ tenant_id: '395b50b9-9504-47ce-a8be-3b5c3ff22315', name: $json.customerName, phone: $json.callerPhone, whatsapp: $json.whatsappNumber, preferred_channel: 'VOICE', consents: { essential: true, marketing: false, intelligence: false }, churn_risk: 'LOW', ltv: $json.total.replace(/[^0-9.]/g, ''), last_order_at: new Date().toISOString() }) }}",
+        "options": {}
+      },
+      "id": "55a8a1cd-a62c-445b-9bdc-ea3b5a7a2f3b",
+      "name": "Create Customer — Supabase7",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -24000,
+        -1168
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "unconfirmed_orders",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "orderId",
+              "fieldValue": "={{ $('Parse Vapi Payload7').item.json.orderId }}"
+            },
+            {
+              "fieldId": "customer_name",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "caller_phone",
+              "fieldValue": "={{ $json.phone }}"
+            },
+            {
+              "fieldId": "whatsapp_number",
+              "fieldValue": "={{ $('Parse Vapi Payload7').item.json.whatsappNumber }}"
+            },
+            {
+              "fieldId": "order_type",
+              "fieldValue": "={{ $('Parse Vapi Payload7').item.json.orderType }}"
+            },
+            {
+              "fieldId": "delivery_address",
+              "fieldValue": "={{ $('Parse Vapi Payload7').item.json.deliveryAddress }}"
+            },
+            {
+              "fieldId": "subtotal",
+              "fieldValue": "={{ $('Parse Vapi Payload7').item.json.subtotal.replace(/[^0-9.]/g, '') }}"
+            },
+            {
+              "fieldId": "tax",
+              "fieldValue": "={{ $('Parse Vapi Payload7').item.json.tax.replace(/[^0-9.]/g, '') }}"
+            },
+            {
+              "fieldId": "total",
+              "fieldValue": "={{ $('Parse Vapi Payload7').item.json.total.replace(/[^0-9.]/g, '') }}"
+            },
+            {
+              "fieldId": "order_confirmed",
+              "fieldValue": "={{ $('Parse Vapi Payload7').item.json.status }}"
+            },
+            {
+              "fieldId": "raw_items",
+              "fieldValue": "={{ $('Parse Vapi Payload7').item.json.itemsSheet }}"
+            },
+            {
+              "fieldId": "tenant_id",
+              "fieldValue": "={{ $json.tenant_id }}"
+            },
+            {
+              "fieldId": "customer_id",
+              "fieldValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -23712,
+        -1168
+      ],
+      "id": "96319df6-7392-4734-9d1b-516d5c76d0a9",
+      "name": "order went into under confirmation3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || {};\nconst msg  = body.message || {};\n\nif (msg.type !== 'end-of-call-report') return [];\n\nconst call = msg.call || {};\n\n// ✅ correct structured output location for your payload\nconst soId = \"6286e9ce-e90e-44e2-bf51-9bd5bb175307\";\nlet sd = msg.artifact?.structuredOutputs?.[soId]?.result || {};\nif (sd.result) sd = sd.result;\n\n// Caller number (web calls may not have it)\nconst callerPhone = call.customer?.number || '';\nconst whatsappRaw = sd.whatsappNumber || callerPhone || '';\n\nconst toE164 = (raw) => {\n  if (!raw) return '';\n  const d = String(raw).replace(/\\D/g, '');\n  if (d.length === 10) return '+1' + d;\n  if (d.length === 11 && d.startsWith('1')) return '+' + d;\n  return d ? ('+' + d) : '';\n};\n\nconst callerE164   = toE164(callerPhone);\nconst whatsappE164 = toE164(whatsappRaw);\n\nconst customerName = sd.customerName || 'Guest';\nconst orderType    = (sd.orderType || 'pickup').toLowerCase();\nconst rawItems     = Array.isArray(sd.items) ? sd.items : [];\nconst deliveryAddress = sd.deliveryAddress || '';\n\n// numbers\nconst subtotalRaw = parseFloat(sd.subtotal || 0);\nconst taxRaw      = parseFloat(sd.tax || 0);\nconst totalRaw    = parseFloat(sd.total || 0);\n\n// order id + timestamp\nconst now  = new Date();\nconst ymd  = now.toISOString().slice(0, 10).replace(/-/g, '');\nconst rand = Math.floor(1000 + Math.random() * 9000);\nconst orderId = `NYPDQ-${ymd}-${rand}`;\n\nconst timestamp = now.toLocaleString('en-US', {\n  timeZone: 'America/New_York',\n  dateStyle: 'short',\n  timeStyle: 'short'\n});\n\nconst itemsSheet = rawItems\n  .map(i => `${i.qty || 1}x ${i.name}`)\n  .join(' | ');\n\nconst itemsWA = rawItems\n  .map(i => `• ${i.qty || 1}x ${i.name}`)\n  .join('\\n');\n\nconst orderLine = orderType === 'delivery'\n  ? `Delivery Address: ${deliveryAddress}`\n  : 'Pickup at 3101 31st Ave, Astoria, Queens';\n\nconst paymentLink = `https://pay.guileo.com/order/${orderId}`;\n\nconst whatsappMsg =\n`New York Pao de Queijo\n\nHi ${customerName}!\n\nThanks for calling us.\n\nOrder ID: ${orderId}\n\nItems:\n${itemsWA}\n\n${orderLine}\n\nSubtotal: $${subtotalRaw.toFixed(2)}\nTax: $${taxRaw.toFixed(2)}\nTotal: $${totalRaw.toFixed(2)}\n\nPlease click the secure link below to pay and confirm your order:\n${paymentLink}`;\n\nreturn [{\n  json: {\n    orderId,\n    timestamp,\n    customerName,\n    callerPhone: callerE164,\n    whatsappNumber: whatsappE164,\n    sameNumber: callerE164 === whatsappE164,\n    orderType,\n    itemsSheet,\n    itemsWA,\n    subtotal: '$' + subtotalRaw.toFixed(2),\n    tax: '$' + taxRaw.toFixed(2),\n    total: '$' + totalRaw.toFixed(2),\n    totalRaw,\n    deliveryAddress,\n    status: 'PENDING_CONFIRMATION',\n    whatsappMsg,\n    paymentLink,\n    // useful for debugging\n    structuredOutputRaw: sd\n  }\n}];"
+      },
+      "id": "59adef3c-bbde-4a73-99bd-7c8d109de310",
+      "name": "Parse Vapi Payload7",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -24352,
+        -1168
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "unconfirmed_orders",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "6b508fc1-ae42-476d-8cfd-dc5cbe2ad63b",
+      "name": "Fetch Unconfirmed Order4",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -23504,
+        -1168
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const u = $input.first().json;\n\nconst now = new Date();\n\nconst datePart = now\n.toISOString()\n.slice(0,10)\n.replace(/-/g,'');\n\nconst rand =\nMath.floor(1000 + Math.random() * 9000);\n\nconst orderNumber =\n`ORD-${datePart}-${rand}`;\n\n// Convert string items into structured objects\nconst rawItemsText = u.raw_items || '';\n\nconst rawItems = rawItemsText\n.split('|')\n.map(i => i.trim())\n.filter(Boolean)\n.map(i => {\n\nconst qtyMatch = i.match(/^(\\d+)x/);\n\nconst qty = qtyMatch\n  ? parseInt(qtyMatch[1])\n  : 1;\n\nconst name = i\n  .replace(/^(\\d+)x\\s*/, '')\n  .trim();\n\nreturn {\n  name,\n  qty\n};\n\n\n});\n\nconst subtotal =\nparseFloat(u.subtotal || 0);\n\nconst tax =\nparseFloat(u.tax || 0);\n\nconst deliveryFee =\nu.order_type === 'delivery'\n? 10\n: 0;\n\nconst total =\n+(subtotal + tax + deliveryFee)\n.toFixed(2);\n\nconst orderRow = {\n\norder_number: orderNumber,\n\ntenant_id: u.tenant_id,\n\ncustomer_id: u.customer_id,\n\ncustomer_name: u.customer_name,\n\ncustomer_phone:\nu.caller_phone ||\nu.whatsapp_number,\n\nsubtotal,\n\ndelivery_fee: deliveryFee,\n\ntax,\n\ntotal,\n\nstatus: 'PENDING',\n\ntype:\n(u.order_type || 'pickup')\n.toUpperCase(),\n\nchannel: 'VOICE',\n\naddress:\nu.delivery_address || null,\n\norder_items:\nJSON.stringify(rawItems),\n\npayment_status:\nu.payment_status || 'PENDING',\n\norder_place_at:\nu.order_place_at,\n\ncreated_at:\nnow.toISOString(),\n\nupdated_at:\nnow.toISOString()\n};\n\nreturn [{\njson: {\norderRow\n}\n}];\n"
+      },
+      "id": "c4b32951-7ea8-4666-bada-2ab12946c50f",
+      "name": "Build Order Payload3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -23232,
+        -1168
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# manual entry for delivery fee\n",
+        "height": 256,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -23344,
+        -1296
+      ],
+      "typeVersion": 1,
+      "id": "c075cadb-fc36-41eb-b88b-cfb606b66040",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "tableId": "orders",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "order_number",
+              "fieldValue": "={{ $json.orderRow.order_number }}"
+            },
+            {
+              "fieldId": "tenant_id",
+              "fieldValue": "={{ $json.orderRow.tenant_id }}"
+            },
+            {
+              "fieldId": "customer_id",
+              "fieldValue": "={{ $json.orderRow.customer_id }}"
+            },
+            {
+              "fieldId": "customer_name",
+              "fieldValue": "={{ $json.orderRow.customer_name }}"
+            },
+            {
+              "fieldId": "customer_phone",
+              "fieldValue": "={{ $json.orderRow.customer_phone }}"
+            },
+            {
+              "fieldId": "subtotal",
+              "fieldValue": "={{ $json.orderRow.subtotal }}"
+            },
+            {
+              "fieldId": "delivery_fee",
+              "fieldValue": "={{ $json.orderRow.delivery_fee }}"
+            },
+            {
+              "fieldId": "tax",
+              "fieldValue": "={{ $json.orderRow.tax }}"
+            },
+            {
+              "fieldId": "total",
+              "fieldValue": "={{ $json.orderRow.total }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.orderRow.status }}"
+            },
+            {
+              "fieldId": "type",
+              "fieldValue": "={{ $json.orderRow.type }}"
+            },
+            {
+              "fieldId": "channel",
+              "fieldValue": "={{ $json.orderRow.channel }}"
+            },
+            {
+              "fieldId": "address",
+              "fieldValue": "={{ $json.orderRow.address }}"
+            },
+            {
+              "fieldId": "order_items",
+              "fieldValue": "={{ $json.orderRow.order_items }}"
+            },
+            {
+              "fieldId": "payment_status",
+              "fieldValue": "={{ $json.orderRow.payment_status }}"
+            },
+            {
+              "fieldId": "order_place_at",
+              "fieldValue": "={{ $json.orderRow.order_place_at }}"
+            }
+          ]
+        }
+      },
+      "id": "8a6ea49c-e76a-4f03-a597-57f0871ad6bd",
+      "name": "Create Order1",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -22864,
+        -1168
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "order_items",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "menu_item_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "quantity",
+              "fieldValue": "={{ $('Split Order Items3').item.json.quantity }}"
+            },
+            {
+              "fieldId": "price",
+              "fieldValue": "={{ $json.price }}"
+            },
+            {
+              "fieldId": "notes",
+              "fieldValue": "={{ $('Create Order1').item.json.notes }}"
+            },
+            {
+              "fieldId": "order_id",
+              "fieldValue": "={{ $('Create Order1').item.json.customer_id }}"
+            }
+          ]
+        }
+      },
+      "id": "cb8ae9f4-6c7b-4dc5-bf06-d75a933ba41a",
+      "name": "Insert Order Items3",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -22240,
+        -1168
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const order = $input.first().json;\n\nconst orderId = order.id;\n\nlet items = [];\n\ntry {\n\nitems =\ntypeof order.order_items === 'string'\n? JSON.parse(order.order_items)\n: order.order_items;\n\n} catch(err) {\n\nthrow new Error(\n'Failed to parse order_items'\n);\n}\n\nreturn items.map(item => ({\n\njson: {\n\n\norder_id: orderId,\n\nsearch_name:\n  item.name,\n\nquantity:\n  parseInt(item.qty || 1)\n\n\n}\n}));\n"
+      },
+      "id": "c28fce9c-5b2f-4ba0-a4f8-290e9326d14f",
+      "name": "Split Order Items3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -22656,
+        -1168
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "menu_items",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "name",
+              "condition": "eq",
+              "keyValue": "={{ $json.search_name }}"
+            }
+          ]
+        }
+      },
+      "id": "f29e589d-a216-4bc0-aa78-5d549730a7bc",
+      "name": "Fetch Unconfirmed Order5",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -22464,
+        -1168
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# call -> order -> shows on frontend complete",
+        "height": 576,
+        "width": 2896,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -24928,
+        -1392
+      ],
+      "typeVersion": 1,
+      "id": "98fc562b-4c00-4e8f-9bfc-891572415753",
+      "name": "Sticky Note19"
+    },
+    {
+      "parameters": {
+        "url": "=https://rvqcajvsnvafzdmdotcw.supabase.co/rest/v1/whatsapp_config?tenant_id=eq.{{$('Create Order1').item.json.tenant_id || '395b50b9-9504-47ce-a8be-3b5c3ff22315'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cWNhanZzbnZhZnpkbWRvdGN3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODgyNTIzMiwiZXhwIjoyMDk0NDAxMjMyfQ.xFDCgKg80lxdGtF6Hb_9J5fAv_jqel_l380Dln1b71A"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cWNhanZzbnZhZnpkbWRvdGN3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODgyNTIzMiwiZXhwIjoyMDk0NDAxMjMyfQ.xFDCgKg80lxdGtF6Hb_9J5fAv_jqel_l380Dln1b71A"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "67176961-5d04-41a9-ac77-b967524cc92e",
+      "name": "Get WhatsApp Config1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -21984,
+        -1152
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v17.0/{{$json[0][\"phone_number_id\"]}}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$json[0][\"access_token\"]}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{$('Parse Vapi Payload7').item.json.whatsappNumber || $('Parse Vapi Payload7').item.json.callerPhone}}\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"order_confirmation_with_payment\",\n    \"language\": {\n      \"code\": \"en_US\"\n    },\n    \"components\": [\n      {\n        \"type\": \"body\",\n        \"parameters\": [\n          { \"type\": \"text\", \"text\": \"{{$('Parse Vapi Payload7').item.json.customerName}}\" },\n          { \"type\": \"text\", \"text\": \"{{$('Create Order1').item.json.order_number || $('Parse Vapi Payload7').item.json.orderId}}\" },\n          { \"type\": \"text\", \"text\": \"{{$('Parse Vapi Payload7').item.json.paymentLink}}\" }\n        ]\n      }\n    ]\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "0a41e751-4673-42a3-8a5f-5e42d0f2b917",
+      "name": "Send WhatsApp Message1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -21792,
+        -1152
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://rvqcajvsnvafzdmdotcw.supabase.co/rest/v1/whatsapp_messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cWNhanZzbnZhZnpkbWRvdGN3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODgyNTIzMiwiZXhwIjoyMDk0NDAxMjMyfQ.xFDCgKg80lxdGtF6Hb_9J5fAv_jqel_l380Dln1b71A"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2cWNhanZzbnZhZnpkbWRvdGN3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODgyNTIzMiwiZXhwIjoyMDk0NDAxMjMyfQ.xFDCgKg80lxdGtF6Hb_9J5fAv_jqel_l380Dln1b71A"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"tenant_id\": \"{{$('Create Order1').item.json.tenant_id || '395b50b9-9504-47ce-a8be-3b5c3ff22315'}}\",\n  \"phone_number\": \"{{$('Parse Vapi Payload7').item.json.whatsappNumber || $('Parse Vapi Payload7').item.json.callerPhone}}\",\n  \"contact_name\": \"{{$('Parse Vapi Payload7').item.json.customerName}}\",\n  \"direction\": \"outbound\",\n  \"message_body\": \"={{$('Parse Vapi Payload7').item.json.whatsappMsg}}\",\n  \"status\": \"sent\",\n  \"order_id\": \"{{$('Create Order1').item.json.order_number || $('Parse Vapi Payload7').item.json.orderId}}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "73b69632-903d-4dda-b1be-2a38043d6d5d",
+      "name": "Log WhatsApp to Supabase1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -21584,
+        -1152
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook — Vapi POST7": {
+      "main": [
+        [
+          {
+            "node": "Respond 200 to Vapi7",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If9": {
+      "main": [
+        [
+          {
+            "node": "Parse Vapi Payload7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Customer — Supabase7": {
+      "main": [
+        [
+          {
+            "node": "order went into under confirmation3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "order went into under confirmation3": {
+      "main": [
+        [
+          {
+            "node": "Fetch Unconfirmed Order4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Vapi Payload7": {
+      "main": [
+        [
+          {
+            "node": "Create Customer — Supabase7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Unconfirmed Order4": {
+      "main": [
+        [
+          {
+            "node": "Build Order Payload3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Order Payload3": {
+      "main": [
+        [
+          {
+            "node": "Create Order1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Order1": {
+      "main": [
+        [
+          {
+            "node": "Split Order Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Order Items3": {
+      "main": [
+        [
+          {
+            "node": "Get WhatsApp Config1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Order Items3": {
+      "main": [
+        [
+          {
+            "node": "Fetch Unconfirmed Order5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Unconfirmed Order5": {
+      "main": [
+        [
+          {
+            "node": "Insert Order Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get WhatsApp Config1": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp Message1": {
+      "main": [
+        [
+          {
+            "node": "Log WhatsApp to Supabase1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

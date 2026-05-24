@@ -13,6 +13,7 @@ import {
   Megaphone, 
   Target, 
   Phone, 
+  MessageCircle,
   Settings,
   LogOut
 } from 'lucide-react'
@@ -32,6 +33,7 @@ const navItems = [
   { label: 'Campaigns', icon: Megaphone, href: '/campaigns' },
   { label: 'Ad Audiences', icon: Target, href: '/audiences' },
   { label: 'Call Logs', icon: Phone, href: '/calls' },
+  { label: 'WhatsApp', icon: MessageCircle, href: '/whatsapp' },
   { label: 'Settings', icon: Settings, href: '/settings' },
 ]
 
