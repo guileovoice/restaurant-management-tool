@@ -38,15 +38,22 @@ export function ChannelBreakdown({ orders }: { orders: Order[] }) {
     }))
     .filter(d => d.count > 0) // Only plot active channels
 
-  // Fallback visual data if no orders are loaded yet
-  const displayData = data.length > 0 ? data : [
-    { channel: 'VOICE', count: 18 },
-    { channel: 'WHATSAPP', count: 14 },
-    { channel: 'WEB', count: 12 },
-    { channel: 'SMS', count: 3 }
-  ]
+  if (data.length === 0) {
+    return (
+      <Card className="p-6 bg-surface border-border flex flex-col h-[400px]">
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-text-primary">Channel Breakdown</h3>
+          <p className="text-sm text-text-muted">Order distribution by source</p>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
+          <p className="text-sm text-text-muted">No order data yet</p>
+          <p className="text-[10px] text-text-muted/60 mt-1">Orders will appear here once placed</p>
+        </div>
+      </Card>
+    )
+  }
 
-  const totalOrders = displayData.reduce((sum, d) => sum + d.count, 0)
+  const totalOrders = data.reduce((sum, d) => sum + d.count, 0)
 
   return (
     <Card className="p-6 bg-surface border-border flex flex-col h-[400px]">
@@ -63,7 +70,7 @@ export function ChannelBreakdown({ orders }: { orders: Order[] }) {
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={displayData}
+              data={data}
               cx="50%"
               cy="50%"
               innerRadius={80}
@@ -73,7 +80,7 @@ export function ChannelBreakdown({ orders }: { orders: Order[] }) {
               nameKey="channel"
               stroke="none"
             >
-              {displayData.map((entry, index) => (
+              {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>

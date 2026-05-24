@@ -16,6 +16,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Guileo AI for Restaurants",
   description: "Vertical SaaS dashboard for restaurant owners powered by AI voice ordering.",
+  icons: { icon: '/favicon.svg' },
 };
 
 export default function RootLayout({

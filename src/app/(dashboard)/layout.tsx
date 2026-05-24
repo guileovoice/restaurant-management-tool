@@ -13,17 +13,26 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname()
   const router = useRouter()
-  const { isOnboarded, isAuthenticated, fetchTenantInfo, initializeSession } = useRestaurantStore()
+  const { isOnboarded, isAuthenticated, checkSession, fetchTenantInfo, initializeSession } = useRestaurantStore()
   const isKitchen = pathname === '/kitchen'
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     const init = async () => {
+      checkSession()
       await initializeSession()
       await fetchTenantInfo()
     }
     init()
-  }, [initializeSession, fetchTenantInfo])
+  }, [checkSession, initializeSession, fetchTenantInfo])
+
+  // Check session expiry every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      checkSession()
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [checkSession])
 
   useEffect(() => {
     // If not authenticated, force login (unless already on auth pages)

@@ -35,12 +35,14 @@ interface RestaurantState {
   voiceSettings: VoiceSettings
   isOnboarded: boolean
   isAuthenticated: boolean
+  sessionStartedAt: number | null
   isLoading: Record<string, boolean>
   
   // Actions
   initializeSession: () => Promise<void>
   login: (email?: string, password?: string) => Promise<boolean>
   logout: () => Promise<void>
+  checkSession: () => boolean
   signup: (email?: string, password?: string, restaurantName?: string) => Promise<boolean>
   fetchTenantInfo: (slug?: string) => Promise<void>
   menuTotalCount: number
@@ -79,7 +81,8 @@ export const useRestaurantStore = create<RestaurantState>()(
         language: 'both'
       },
       isOnboarded: true,
-      isAuthenticated: true, // Default to true for visual flow, but will check session
+      isAuthenticated: false,
+      sessionStartedAt: null,
       isLoading: {},
 
       initializeSession: async () => {
@@ -93,7 +96,7 @@ export const useRestaurantStore = create<RestaurantState>()(
       login: async (email, password) => {
         if (!email || !password) {
           // Fallback to mock session
-          set({ isAuthenticated: true })
+          set({ isAuthenticated: true, sessionStartedAt: Date.now() })
           return true
         }
 
@@ -113,6 +116,7 @@ export const useRestaurantStore = create<RestaurantState>()(
           set({
             isAuthenticated: true,
             isOnboarded: true,
+            sessionStartedAt: Date.now(),
             profile: {
               id: user.id,
               email: user.email,
@@ -138,6 +142,7 @@ export const useRestaurantStore = create<RestaurantState>()(
           isOnboarded: false, 
           info: null, 
           profile: null,
+          sessionStartedAt: null,
           menu: [],
           menuTotalCount: 0,
           customers: [],
@@ -145,9 +150,23 @@ export const useRestaurantStore = create<RestaurantState>()(
         })
       },
 
+      checkSession: () => {
+        const { sessionStartedAt } = get()
+        if (!sessionStartedAt) {
+          set({ isAuthenticated: false })
+          return false
+        }
+        const elapsed = Date.now() - sessionStartedAt
+        if (elapsed > 3600000) {
+          get().logout()
+          return false
+        }
+        return true
+      },
+
       signup: async (email, password, restaurantName) => {
         if (!email || !password) {
-          set({ isAuthenticated: true, isOnboarded: false })
+          set({ isAuthenticated: true, isOnboarded: false, sessionStartedAt: Date.now() })
           return true
         }
 
@@ -168,6 +187,7 @@ export const useRestaurantStore = create<RestaurantState>()(
           set({
             isAuthenticated: true,
             isOnboarded: false,
+            sessionStartedAt: Date.now(),
             profile: {
               id: data.id,
               email: data.email,
@@ -626,6 +646,7 @@ export const useRestaurantStore = create<RestaurantState>()(
       partialize: (state) => ({ 
         isOnboarded: state.isOnboarded, 
         isAuthenticated: state.isAuthenticated,
+        sessionStartedAt: state.sessionStartedAt,
         profile: state.profile,
         info: state.info
       }),
