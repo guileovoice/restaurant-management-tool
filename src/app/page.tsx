@@ -187,9 +187,37 @@ export default function ProfessionalLandingPage() {
       // 4. Trigger Success State
       setPlacedOrderNumber(orderNum)
       setPlacedOrderTotal(finalTotal)
-      setStep('SUCCESS')
-      setIsPaymentOpen(false)
-      setCart([])
+      setIsPaymentOpen(false) // Close the modal first
+
+      // Ping n8n Webhook to trigger WhatsApp confirmation for Web Orders
+      try {
+        fetch('https://n8n.srv1010832.hstgr.cloud/webhook/web-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tenantId,
+            orderId,
+            orderNumber: orderNum,
+            customerName,
+            customerPhone,
+            address: orderType === 'DELIVERY' ? address : 'Pickup at 3101 31st Ave, Astoria, NY',
+            subtotal: cartTotal,
+            tax: tax,
+            total: finalTotal,
+            items: orderItems,
+            paymentLink: `https://pay.guileo.com/order/${orderNum}`
+          })
+        }).catch(err => console.error('Failed to trigger WA webhook', err));
+      } catch (err) {
+        console.error('Failed to trigger WA webhook', err);
+      }
+
+      // Wait 300ms before changing UI step so the Radix Dialog can cleanly remove the body scroll lock!
+      setTimeout(() => {
+        setStep('SUCCESS')
+        setCart([])
+      }, 300)
+      
       toast.success('Payment authorized! Order sent to kitchen.')
     } catch (err: any) {
       console.error(err)
@@ -247,7 +275,7 @@ export default function ProfessionalLandingPage() {
           </div>
           <Button 
             className="w-full h-12 bg-amber-500 hover:bg-amber-600 text-black font-bold uppercase tracking-widest rounded-xl transition-all" 
-            onClick={() => setStep('MENU')}
+            onClick={() => window.location.reload()}
           >
             Order Something Else
           </Button>

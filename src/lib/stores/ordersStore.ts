@@ -53,11 +53,6 @@ export const useOrdersStore = create<OrdersState>((set) => ({
         let orderStatus = o.status as OrderStatus
         let orderNotes = o.notes || ''
 
-        if (orderNotes.includes('[STATUS:OUT_FOR_DELIVERY]')) {
-          orderStatus = 'OUT_FOR_DELIVERY'
-          orderNotes = orderNotes.replace(/\[STATUS:OUT_FOR_DELIVERY\]/g, '').trim()
-        }
-
         return {
           id: o.id,
           orderNumber: o.order_number || '',
@@ -102,28 +97,9 @@ export const useOrdersStore = create<OrdersState>((set) => ({
     try {
       const updatedTime = new Date().toISOString()
       
-      let dbStatus = newStatus
-      let dbNotesUpdate: string | undefined = undefined
-
-      if (newStatus === 'OUT_FOR_DELIVERY') {
-        dbStatus = 'READY'
-        const localOrder = useOrdersStore.getState().orders.find(o => o.id === orderId)
-        const baseNotes = localOrder?.notes || ''
-        const cleanedNotes = baseNotes.replace(/\[STATUS:\w+\]/g, '').trim()
-        dbNotesUpdate = `${cleanedNotes} [STATUS:OUT_FOR_DELIVERY]`.trim()
-      } else {
-        const localOrder = useOrdersStore.getState().orders.find(o => o.id === orderId)
-        if (localOrder?.notes?.includes('[STATUS:')) {
-          dbNotesUpdate = localOrder.notes.replace(/\[STATUS:\w+\]/g, '').trim()
-        }
-      }
-
       const updatePayload: any = {
-        status: dbStatus,
+        status: newStatus,
         updated_at: updatedTime
-      }
-      if (dbNotesUpdate !== undefined) {
-        updatePayload.notes = dbNotesUpdate
       }
 
       const { error } = await supabase
@@ -143,7 +119,6 @@ export const useOrdersStore = create<OrdersState>((set) => ({
             ? { 
                 ...order, 
                 status: newStatus, 
-                notes: dbNotesUpdate !== undefined ? dbNotesUpdate.replace(/\[STATUS:OUT_FOR_DELIVERY\]/g, '').trim() : order.notes,
                 updatedAt: updatedTime 
               } 
             : order
@@ -156,13 +131,6 @@ export const useOrdersStore = create<OrdersState>((set) => ({
 
   addOrder: async (order) => {
     try {
-      let dbStatus = order.status
-      let dbNotes = order.notes || ''
-      if (order.status === 'OUT_FOR_DELIVERY') {
-        dbStatus = 'READY'
-        dbNotes = `${dbNotes} [STATUS:OUT_FOR_DELIVERY]`.trim()
-      }
-
       const dbOrder = {
         id: order.id,
         order_number: order.orderNumber,
@@ -174,11 +142,11 @@ export const useOrdersStore = create<OrdersState>((set) => ({
         delivery_fee: order.deliveryFee,
         tax: order.tax,
         total: order.total,
-        status: dbStatus,
+        status: order.status,
         type: order.type,
         channel: order.channel,
         address: order.address,
-        notes: dbNotes,
+        notes: order.notes || '',
         payment_status: order.paymentStatus,
         estimated_ready_at: order.estimatedReadyAt,
         created_at: order.createdAt || new Date().toISOString(),
