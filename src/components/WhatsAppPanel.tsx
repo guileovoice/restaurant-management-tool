@@ -369,33 +369,6 @@ export function WhatsAppPanel() {
                 })}
                 <div ref={messagesEndRef} />
               </div>
-
-              {/* Chat Input */}
-              <div className="p-4 bg-[#13131A] border-t border-border flex items-end gap-3 flex-shrink-0">
-                <button className="p-2 text-text-muted hover:text-white transition-colors flex-shrink-0">
-                  <Paperclip size={20} />
-                </button>
-                <textarea 
-                  value={inputText}
-                  onChange={e => setInputText(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault()
-                      handleSendMessage()
-                    }
-                  }}
-                  placeholder="Type a message (Dummy Mode active)..."
-                  className="flex-1 bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary resize-none h-[44px] max-h-[120px]"
-                  rows={1}
-                />
-                <button 
-                  onClick={handleSendMessage}
-                  disabled={!inputText.trim()}
-                  className="p-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                >
-                  <Send size={18} />
-                </button>
-              </div>
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-text-muted">
