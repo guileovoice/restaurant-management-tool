@@ -212,6 +212,25 @@ export default function ProfessionalLandingPage() {
         console.error('Failed to trigger WA webhook', err);
       }
 
+      // Ping n8n Webhook to trigger SMS confirmation for Web Orders
+      try {
+        fetch('https://n8n.srv1010832.hstgr.cloud/webhook/sms-notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'order_confirmation',
+            tenant_id: tenantId,
+            phone_number: customerPhone,
+            customer_name: customerName,
+            order_number: orderNum,
+            total: finalTotal,
+            link: `https://pay.guileo.com/order/${orderNum}`
+          })
+        }).catch(err => console.error('Failed to trigger SMS webhook', err));
+      } catch (err) {
+        console.error('Failed to trigger SMS webhook', err);
+      }
+
       // Wait 300ms before changing UI step so the Radix Dialog can cleanly remove the body scroll lock!
       setTimeout(() => {
         setStep('SUCCESS')

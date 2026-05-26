@@ -15,12 +15,14 @@ export async function upsertCustomerForOrder(
     const phoneToQuery = customerPhone.trim()
 
     // 1. Query existing customer
-    const { data: existingCust, error: fetchErr } = await supabase
+    const { data: existingCustList, error: fetchErr } = await supabase
       .from('customers')
       .select('*')
       .eq('phone', phoneToQuery)
       .eq('tenant_id', tenantId)
-      .maybeSingle()
+      .limit(1)
+
+    const existingCust = existingCustList && existingCustList.length > 0 ? existingCustList[0] : null
 
     if (fetchErr) {
       console.error("Error fetching existing customer:", fetchErr)
