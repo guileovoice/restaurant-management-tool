@@ -42,6 +42,7 @@ import { cn } from '@/lib/utils'
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
 import { supabase, upsertCustomerForOrder } from '@/lib/supabaseClient'
 import { toast } from 'react-hot-toast'
+import { LanguageSelector } from '@/components/shared/LanguageSelector'
 
 export default function ProfessionalLandingPage() {
   const { menu, info, fetchMenu, fetchTenantInfo } = useRestaurantStore()
@@ -331,6 +332,7 @@ export default function ProfessionalLandingPage() {
           </div>
 
           <div className="flex items-center gap-4">
+            <LanguageSelector />
             <Button 
               onClick={scrollToMenu} 
               className="hidden sm:flex bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold uppercase tracking-wider h-10 px-6 rounded-xl transition-all shadow-lg shadow-amber-500/10"

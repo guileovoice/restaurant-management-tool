@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils'
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
 import { Label } from '@/components/ui/label'
 import { useOrdersStore } from '@/lib/stores/ordersStore'
+import { LanguageSelector } from '@/components/shared/LanguageSelector'
 
 export default function PublicOrderPage() {
   const { tenant } = useParams()
@@ -144,7 +145,10 @@ export default function PublicOrderPage() {
               <p className="text-[10px] text-text-muted uppercase font-bold tracking-widest mt-1">{info?.category || 'Cafe'} · {info?.address || 'Location'}</p>
             </div>
           </div>
-          <Badge className="bg-emerald-500/10 text-emerald-500 border-none px-2 py-0.5 text-[10px] font-bold">OPEN NOW</Badge>
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
+            <Badge className="bg-emerald-500/10 text-emerald-500 border-none px-2 py-0.5 text-[10px] font-bold">OPEN NOW</Badge>
+          </div>
         </div>
 
         <div className="flex bg-surface rounded-xl p-1 border border-border mb-6">

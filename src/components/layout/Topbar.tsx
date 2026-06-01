@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { format } from 'date-fns'
 import { useRouter } from 'next/navigation'
+import { LanguageSelector } from '@/components/shared/LanguageSelector'
 
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
 
@@ -63,6 +64,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       </div>
 
       <div className="flex items-center gap-4">
+        <LanguageSelector />
+
         <div className="hidden xl:flex items-center gap-2 text-sm text-text-muted border-r border-border pr-4 mr-2">
           <Calendar className="w-4 h-4" />
           <span>{mounted ? format(time, 'EEE, MMM d · hh:mm:ss aa') : 'Loading time...'}</span>
@@ -167,7 +170,6 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             <DropdownMenuLabel className="text-text-primary">My Account</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-border" />
             <DropdownMenuItem className="text-text-primary focus:bg-surface2 cursor-pointer" onClick={() => router.push('/settings?tab=business')}>Profile</DropdownMenuItem>
-            <DropdownMenuItem className="text-text-primary focus:bg-surface2 cursor-pointer" onClick={() => router.push('/settings?tab=billing')}>Billing</DropdownMenuItem>
             <DropdownMenuItem className="text-text-primary focus:bg-surface2 cursor-pointer" onClick={() => router.push('/settings?tab=team')}>Team</DropdownMenuItem>
             <DropdownMenuSeparator className="bg-border" />
             <DropdownMenuItem 

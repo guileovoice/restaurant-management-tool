@@ -138,25 +138,58 @@ export default function CustomerDetailPage() {
 
   const handleDeleteProfile = async () => {
     if (!customer) return
-    const confirmed = window.confirm(`Are you sure you want to permanently delete the profile for ${customer.name}?`)
-    if (!confirmed) return
 
-    try {
-      const { error } = await supabase
-        .from('customers')
-        .delete()
-        .eq('id', customer.id)
+    toast((t) => (
+      <div className="flex flex-col gap-3 text-text-primary min-w-[280px]">
+        <p className="text-xs font-semibold leading-relaxed">
+          <span>Are you sure you want to permanently delete the profile for </span>
+          <strong>{customer.name}</strong>
+          <span>?</span>
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="h-7 px-2.5 text-[10px] font-bold uppercase border-border cursor-pointer bg-surface hover:bg-surface2" 
+            onClick={() => toast.dismiss(t.id)}
+          >
+            Cancel
+          </Button>
+          <Button 
+            size="sm"
+            className="h-7 px-2.5 text-[10px] font-bold uppercase bg-danger hover:bg-red-600 text-white cursor-pointer" 
+            onClick={async () => {
+              toast.dismiss(t.id)
+              try {
+                const { error } = await supabase
+                  .from('customers')
+                  .delete()
+                  .eq('id', customer.id)
 
-      if (error) {
-        toast.error(`Error deleting profile: ${error.message}`)
-      } else {
-        toast.success("Customer profile deleted successfully.")
-        fetchCustomers()
-        router.push('/customers')
+                if (error) {
+                  toast.error(`Error deleting profile: ${error.message}`)
+                } else {
+                  toast.success("Customer profile deleted successfully.")
+                  fetchCustomers()
+                  router.push('/customers')
+                }
+              } catch (err: any) {
+                toast.error(`Error: ${err.message}`)
+              }
+            }}
+          >
+            Confirm
+          </Button>
+        </div>
+      </div>
+    ), {
+      duration: 10000,
+      position: 'top-center',
+      style: {
+        background: '#1A1A24',
+        border: '1px solid #2E2E3F',
       }
-    } catch (err: any) {
-      toast.error(`Error: ${err.message}`)
-    }
+    })
   }
 
   if (!customer) {

@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from 'react-hot-toast'
 import Link from 'next/link'
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
+import { LanguageSelector } from '@/components/shared/LanguageSelector'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -44,7 +45,10 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-background overflow-hidden">
+    <div className="flex min-h-screen w-full bg-background overflow-hidden relative">
+      <div className="absolute top-6 right-6 z-50">
+        <LanguageSelector />
+      </div>
       {/* Left Section - 60% */}
       <div className="w-full lg:w-[60%] p-8 md:p-16 lg:p-24 flex flex-col justify-between">
         <div className="flex items-center gap-2">

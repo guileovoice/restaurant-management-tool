@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'react-hot-toast'
 import Link from 'next/link'
 import { useRestaurantStore } from '@/lib/stores/restaurantStore'
+import { LanguageSelector } from '@/components/shared/LanguageSelector'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -43,6 +44,10 @@ export default function LoginPage() {
     <div className="flex min-h-screen w-full bg-background relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(108,60,225,0.08)_0%,transparent_50%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_100%_100%,rgba(16,185,129,0.04)_0%,transparent_50%)]" />
+
+      <div className="absolute top-6 right-6 z-50">
+        <LanguageSelector />
+      </div>
 
       <div className="relative w-full max-w-sm mx-auto p-6 flex flex-col justify-center min-h-screen">
         <div className="bg-surface border border-border rounded-2xl p-8 shadow-2xl">

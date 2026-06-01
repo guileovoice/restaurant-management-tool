@@ -24,6 +24,7 @@ import { useRestaurantStore } from '@/lib/stores/restaurantStore'
 import { MenuItem } from '@/lib/types'
 import { toast } from 'react-hot-toast'
 import { cn } from '@/lib/utils'
+import { LanguageSelector } from '@/components/shared/LanguageSelector'
 
 const VOICES = [
   { id: 'v1', name: 'Alex', desc: 'Professional & Warm' },
@@ -107,7 +108,10 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative">
+      <div className="absolute top-6 right-6 z-50">
+        <LanguageSelector />
+      </div>
       <div className="max-w-3xl w-full">
         {/* Progress Bar */}
         <div className="flex items-center justify-between mb-12 relative">

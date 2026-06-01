@@ -105,11 +105,7 @@ function SettingsContent() {
         <TabsList className="bg-surface border border-border flex flex-row lg:flex-col items-center lg:items-stretch h-auto p-2 lg:w-[240px] shrink-0 w-full lg:w-auto overflow-x-auto lg:overflow-x-visible scrollbar-none gap-1 lg:gap-0">
           {[
             { id: 'business', label: 'Business Info', icon: Building2 },
-            { id: 'voice', label: 'Voice Persona', icon: Mic2 },
-            { id: 'notifications', label: 'Notifications', icon: Bell },
-            { id: 'integrations', label: 'Integrations', icon: LinkIcon },
             { id: 'team', label: 'Team Members', icon: Users },
-            { id: 'billing', label: 'Billing', icon: CreditCard },
             { id: 'danger', label: 'Danger Zone', icon: AlertTriangle, color: 'text-danger' },
           ].map((tab) => (
             <TabsTrigger 
@@ -535,12 +531,42 @@ function SettingsContent() {
                   </div>
                   <Button 
                     variant="outline" 
-                    className="border-red-500/30 bg-red-500/10 text-danger hover:bg-red-500/20"
+                    className="border-red-500/30 bg-red-500/10 text-danger hover:bg-red-500/20 cursor-pointer"
                     onClick={() => {
-                      const c = confirm("Are you absolutely sure you want to delete all customer intelligence profiles? This action is irreversible.");
-                      if (c) {
-                        toast.error("All customer data wiped for privacy compliance!");
-                      }
+                      toast((t) => (
+                        <div className="flex flex-col gap-3 text-text-primary min-w-[280px]">
+                          <p className="text-xs font-semibold leading-relaxed">
+                            Are you absolutely sure you want to delete all customer intelligence profiles? This action is irreversible.
+                          </p>
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="h-7 px-2.5 text-[10px] font-bold uppercase border-border cursor-pointer bg-surface hover:bg-surface2" 
+                              onClick={() => toast.dismiss(t.id)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              size="sm"
+                              className="h-7 px-2.5 text-[10px] font-bold uppercase bg-danger hover:bg-red-600 text-white cursor-pointer" 
+                              onClick={() => {
+                                toast.dismiss(t.id)
+                                toast.error("All customer data wiped for privacy compliance!")
+                              }}
+                            >
+                              Confirm
+                            </Button>
+                          </div>
+                        </div>
+                      ), {
+                        duration: 10000,
+                        position: 'top-center',
+                        style: {
+                          background: '#1A1A24',
+                          border: '1px solid #2E2E3F',
+                        }
+                      })
                     }}
                   >
                     Delete Data
@@ -552,12 +578,42 @@ function SettingsContent() {
                     <p className="text-xs text-text-muted">Pause all AI operations and set account to dormant.</p>
                   </div>
                   <Button 
-                    className="bg-danger hover:bg-red-700 text-white font-bold"
+                    className="bg-danger hover:bg-red-700 text-white font-bold cursor-pointer"
                     onClick={() => {
-                      const c = confirm("Are you sure you want to pause all NYPDQ operations? The AI voice persona Sofia will stop answering incoming customer orders.");
-                      if (c) {
-                        toast.error("Restaurant has been deactivated. Sofia is offline.");
-                      }
+                      toast((t) => (
+                        <div className="flex flex-col gap-3 text-text-primary min-w-[280px]">
+                          <p className="text-xs font-semibold leading-relaxed">
+                            Are you sure you want to pause all NYPDQ operations? The AI voice persona Sofia will stop answering incoming customer orders.
+                          </p>
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="h-7 px-2.5 text-[10px] font-bold uppercase border-border cursor-pointer bg-surface hover:bg-surface2" 
+                              onClick={() => toast.dismiss(t.id)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              size="sm"
+                              className="h-7 px-2.5 text-[10px] font-bold uppercase bg-danger hover:bg-red-600 text-white cursor-pointer" 
+                              onClick={() => {
+                                toast.dismiss(t.id)
+                                toast.error("Restaurant has been deactivated. Sofia is offline.")
+                              }}
+                            >
+                              Confirm
+                            </Button>
+                          </div>
+                        </div>
+                      ), {
+                        duration: 10000,
+                        position: 'top-center',
+                        style: {
+                          background: '#1A1A24',
+                          border: '1px solid #2E2E3F',
+                        }
+                      })
                     }}
                   >
                     Deactivate Account
