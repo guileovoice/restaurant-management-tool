@@ -482,25 +482,7 @@ export default function DialerPage() {
         </Card>
       </div>
 
-      {/* Help Card for setup */}
-      <Card className="p-6 bg-surface border-border">
-        <h4 className="text-xs font-bold text-text-primary uppercase tracking-widest flex items-center gap-2 mb-3">
-          <AlertCircle className="w-4 h-4 text-amber-500" /> Setup & configuration
-        </h4>
-        <div className="text-xs text-text-muted space-y-2.5 leading-relaxed">
-          <p>
-            This dialer replicates the <strong>“Test Call” dialer</strong> of Vapi. Under the hood, it triggers the Vapi Outbound Call API. To place a call successfully, ensure you have correctly set the following environment variables in your <code>.env.local</code> file:
-          </p>
-          <div className="p-3 bg-surface2 rounded-lg font-mono text-[11px] space-y-1 text-text-primary border border-border">
-            <div>VAPI_PRIVATE_KEY=<span className="text-text-muted">&lt;Your Vapi Private API Key&gt;</span></div>
-            <div>VAPI_ASSISTANT_ID=<span className="text-text-muted">&lt;Your Vapi Assistant ID&gt;</span></div>
-            <div>VAPI_PHONE_NUMBER_ID=<span className="text-text-muted">&lt;Your Outbound Phone Number ID (Optional/Required for PSTN)&gt;</span></div>
-          </div>
-          <p>
-            When a call ends, its logs, summary, cost, and transcript are fetched from Vapi and saved to the <code>vapi_call_logs</code> table in Supabase. You can view them on the <Link href="/calls" className="text-primary hover:underline font-semibold font-bold">Call & Message Logs</Link> page.
-          </p>
-        </div>
-      </Card>
+      
 
       {/* Call Analysis Modal */}
       {finalCallLog && (
